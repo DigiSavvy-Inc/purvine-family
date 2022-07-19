@@ -56,3 +56,4 @@ Thumbs.db
 ##########
 .sass-cache
 /.lando.yml
+/.htaccess
