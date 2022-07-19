@@ -57,3 +57,5 @@ Thumbs.db
 .sass-cache
 /.lando.yml
 /.htaccess
+/wp-config.php
+/purvine-org.code-workspace
