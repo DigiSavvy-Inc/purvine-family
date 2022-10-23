@@ -2,14 +2,13 @@
 Contributors: munirkamal
 Tags: block, blocks, editor, gutenberg, gutenberg blocks, wordpress blocks, pattern
 Requires at least: 5.0
-Tested up to: 5.9
+Tested up to: 6.0
 Requires PHP: 7.2
-Stable tag: 2.9.11
+Stable tag: 2.9.12
 License: GPL-3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
 Editor Plus extends Gutenberg editor with blocks, advanced design controls, typography, icons, Shape Divider, animations and many more features.
-
 
 == Description ==
 
@@ -126,27 +125,6 @@ Starting with Editor Plus v1.6.0, now you can copy a block style and paste it to
 
 This release also improved responsive editing features by synchronizing the responsive previewer window.
 
-## Template and Pattern Library
-
-Editor Plus includes access to the Extendify template and pattern library that can be accessed by clicking the "Library" button in the menu bar of the editor. We provide a variety of templates and patterns to serve different use cases and are adding more templates every week.
-
-## Privacy
-
-The Extendify library uses a custom API to fetch block patterns and page layouts from our servers. API requests are only made when a user clicks on the Library button. In order to provide and improve this service, Extendify passes site data along with an API request, including:
-
-* Browser
-* Referring site
-* Category selection
-* WP language
-* Active theme
-* Active plugins
-* Anonymized UUID
-* Anonymized IP address
-
-By accessing the Extendify library, you agree to the Extendify [privacy policy](https://extendify.com/privacy-policy) and [terms of service](https://extendify.com/terms-of-service).
-
-For more details on the terms of service: [https://extendify.com/terms-of-service](https://extendify.com/terms-of-service)
-
 ## There is much more to come, stay tuned.
 
 More exciting features and enhancements are planned for the WordPress Gutenberg Editor. Stay tuned for updates. 😇
@@ -168,6 +146,9 @@ Make sure to check out the Admin are of the plugin for configuration settings.
 == Changelog ==
 
 **Note:** Kindly excuse several frequent updates, as we are making major code refactoring under the hood. That raises some issues that we are unable to trace all ourselves. But we are trying our best to fix it as soon as someone reports it.
+
+=2.9.12 (12 Oct 2022)
+* Deprecate: Remove Extendify Library SDK
 
 =2.9.11 (5 Sep 2022)
 * Fix: Bugs
