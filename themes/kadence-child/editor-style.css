@@ -1,0 +1,15 @@
+/** @format */
+
+div[data-title='Reusable block'] {
+	max-width: 100vw !important;
+}
+
+.kt-row-valign-middle .block-editor-block-list__layout {
+	align-items: center;
+}
+
+div.aligncenter {
+	display: block;
+	margin: 0 auto;
+	width: inherit;
+}
