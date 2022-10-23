@@ -1,0 +1,8 @@
+.module-content {
+  @include grid-media($sm) {
+    padding: 2em 20px;
+  }
+  @include grid-media($md) {
+    padding: 3em 0;
+  }
+}

@@ -1,0 +1,19 @@
+.page-template-landing-pages {
+  .site-header .__top-header {
+    @include grid-media($small-screen-down) {
+      padding: 0;
+    }
+  }
+  #primary {
+    margin: 0;
+    padding: 0;
+  }
+  .inner-content {
+    margin: auto;
+    width: $maxwidth;
+    max-width: 100%;
+  }
+  section {
+    @include section-container("full");
+  }
+}

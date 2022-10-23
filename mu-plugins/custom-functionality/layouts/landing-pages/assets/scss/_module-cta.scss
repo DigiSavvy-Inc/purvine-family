@@ -1,0 +1,39 @@
+.module-call-to-action {
+  .inner-content {
+    @include grid-media($sm) {
+      display: flex;
+      flex-direction: column;
+      padding: 2em 20px;
+    }
+    @include grid-media($md) {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2em 0;
+    }
+
+    .cta-content {
+      .cta-heading {
+        font-size: 40px;
+        flex: 3;
+        max-width: 750px;
+      }
+    }
+    .cta-button-content {
+      a.cta {
+        @include grid-media($sm) {
+          font-size: 20px;
+          padding: 1em !important;
+          border-radius: 5px;
+          flex: 1;
+          display: flex;
+          justify-content: center;
+          order: 1;
+          align-items: center;
+          min-width: 75px;
+          max-width: 300px;
+        }
+      }
+    }
+  }
+}

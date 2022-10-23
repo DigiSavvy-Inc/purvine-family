@@ -1,0 +1,31 @@
+.module-call-out {
+  @include grid-media($sm) {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 0;
+  }
+  @include grid-media($md) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .call-out {
+    min-height: 350px;
+    padding: 2em 1em;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    text-align: center;
+    img {
+      max-width: 50px;
+      align-self: center;
+    }
+    a.call-out-link {
+      background: #fff;
+      max-width: 200px;
+      color: #000 !important;
+      padding: 0.5em 2em;
+      align-self: center;
+      justify-self: flex-end;
+      margin-top: auto;
+    }
+  }
+}
