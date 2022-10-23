@@ -1035,6 +1035,9 @@ class Kadence_Pro_API_Manager {
 				'ajax_nonce' => wp_create_nonce( 'kadence-ajax-verification' ),
 			)
 		);
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			wp_set_script_translations( 'kadence-pro-dashboard', 'kadence-pro' );
+		}
 	}
 	/**
 	 * Create Software API URL

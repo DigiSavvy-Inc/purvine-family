@@ -23,7 +23,7 @@ function kadence_blocks_pro_get_all_image_sizes() {
 	global $_wp_additional_image_sizes;
 
 	$default_image_sizes = get_intermediate_image_sizes();
-
+	$image_sizes = array();
 	foreach ( $default_image_sizes as $size ) {
 		$image_sizes[ $size ]['width']  = intval( get_option( "{$size}_size_w" ) );
 		$image_sizes[ $size ]['height'] = intval( get_option( "{$size}_size_h" ) );
@@ -65,7 +65,7 @@ function kadence_blocks_pro_editor_assets() {
 	// Scripts.
 	$asset_meta = kadence_blocks_pro_get_asset_file( 'dist/build/blocks' );
 	//wp_register_script( 'kadence-blocks-pro-vendor', KBP_URL . 'dist/build/vendors/blocks.js', array_merge( $asset_meta['dependencies'], array( 'wp-api', 'kadence-blocks-js' ) ), $asset_meta['version'], true );
-	wp_register_script( 'kadence-blocks-pro-js', KBP_URL . 'dist/build/blocks.js', array_merge( $asset_meta['dependencies'], array( 'wp-api', 'kadence-blocks-js', 'kadence-blocks-vendor' ) ), $asset_meta['version'], true );
+	wp_register_script( 'kadence-blocks-pro-js', KBP_URL . 'dist/build/blocks.js', array_merge( $asset_meta['dependencies'], array( 'wp-api', 'kadence-blocks-js' ) ), $asset_meta['version'], true );
 
 	// Styles.
 	wp_register_style( 'kadence-blocks-pro-editor-css', KBP_URL . 'dist/build/blocks.css', array( 'wp-edit-blocks' ), $asset_meta['version'] );
@@ -83,11 +83,13 @@ function kadence_blocks_pro_gutenberg_editor_assets_variables() {
 	$the_post_id  = ( ! empty( $recent_posts[0]['ID'] ) ? $recent_posts[0]['ID'] : null );
 	wp_localize_script(
 		'kadence-blocks-pro-js',
-		'ktGbToolsData',
+		'kbpData',
 		array(
 			'restBase' => esc_url_raw( get_rest_url() ),
 			'postSelectEndpoint' => '/kbpp/v1/post-select',
 			'postQueryEndpoint' => '/kbpp/v1/post-query',
+			'termEndpoint' => '/kbpp/v1/term-select',
+			'taxonomiesEndpoint' => '/kbpp/v1/taxonomies-select',
 			'postTypes' => kadence_blocks_pro_get_post_types(),
 			'taxonomies' => kadence_blocks_pro_get_taxonomies(),
 			'isKadenceT'  => class_exists( 'Kadence\Theme' ),
@@ -140,6 +142,8 @@ function kadence_blocks_pro_register_api_endpoints() {
 	$controller->register_routes();
 	$mailchimp_controller = new Kadence_MailChimp_REST_Controller;
 	$mailchimp_controller->register_routes();
+	$activecampaign_controller = new KBP_ActiveCampaign_REST_Controller;
+	$activecampaign_controller->register_routes();
 	$sendinblue_controller = new Kadence_SendInBlue_REST_Controller;
 	$sendinblue_controller->register_routes();
 	$dynamic_controller = new Kadence_Blocks_Dynamic_Content_Controller;

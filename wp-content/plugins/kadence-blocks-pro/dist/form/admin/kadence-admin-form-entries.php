@@ -134,6 +134,7 @@ class KB_Form_Admin_Entries {
 					<div class="kadence-blocks-single-entry-view">
 						<div id="kadence-blocks-entry-fields" class="postbox">
 							<h2 class="hndle">
+								<?php // translators: #%2$s refers to the entry name. ?>
 								<span><?php printf( __( '%1$s : Entry #%2$s', 'kadence-blocks-pro' ), esc_html( $entry->get_name() ), absint( $entry->get_id() ) ); ?></span>
 							</h2>
 							<table class="kb-form-entries-single-table wp-list-table widefat fixed striped posts">

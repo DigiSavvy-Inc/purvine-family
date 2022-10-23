@@ -677,14 +677,14 @@ class Kadence_Blocks_Pro_Frontend {
 			return;
 		}
 		// Lets register all the block styles.
-		wp_register_style( 'kadence-blocks-gallery-pro', KBP_URL . 'dist/build/style-block-css/gallery-styles.css', array(), KBP_VERSION );
-		wp_register_style( 'kadence-blocks-image-overlay', KBP_URL . 'dist/build/style-block-css/image-overlay-styles.css', array(), KBP_VERSION );
-		wp_register_style( 'kadence-blocks-modal', KBP_URL . 'dist/build/style-block-css/modal-styles.css', array(), KBP_VERSION );
-		wp_register_style( 'kadence-blocks-portfolio-grid', KBP_URL . 'dist/build/style-block-css/portfolio-grid-styles.css', array(), KBP_VERSION );
-		wp_register_style( 'kadence-blocks-product-carousel', KBP_URL . 'dist/build/style-block-css/product-carousel-styles.css', array(), KBP_VERSION );
-		wp_register_style( 'kadence-blocks-slider', KBP_URL . 'dist/build/style-block-css/slider-styles.css', array(), KBP_VERSION );
-		wp_register_style( 'kadence-blocks-split-content', KBP_URL . 'dist/build/style-block-css/split-content-styles.css', array(), KBP_VERSION );
-		wp_register_style( 'kadence-blocks-video-popup', KBP_URL . 'dist/build/style-block-css/video-popup-styles.css', array(), KBP_VERSION );
+		wp_register_style( 'kadence-blocks-gallery-pro', KBP_URL . 'dist/build/block-css/style-gallery-styles.css', array(), KBP_VERSION );
+		wp_register_style( 'kadence-blocks-image-overlay', KBP_URL . 'dist/build/block-css/style-image-overlay-styles.css', array(), KBP_VERSION );
+		wp_register_style( 'kadence-blocks-modal', KBP_URL . 'dist/build/block-css/style-modal-styles.css', array(), KBP_VERSION );
+		wp_register_style( 'kadence-blocks-portfolio-grid', KBP_URL . 'dist/build/block-css/style-portfolio-grid-styles.css', array(), KBP_VERSION );
+		wp_register_style( 'kadence-blocks-product-carousel', KBP_URL . 'dist/build/block-css/style-product-carousel-styles.css', array(), KBP_VERSION );
+		wp_register_style( 'kadence-blocks-slider', KBP_URL . 'dist/build/block-css/style-slider-styles.css', array(), KBP_VERSION );
+		wp_register_style( 'kadence-blocks-split-content', KBP_URL . 'dist/build/block-css/style-split-content-styles.css', array(), KBP_VERSION );
+		wp_register_style( 'kadence-blocks-video-popup', KBP_URL . 'dist/build/block-css/style-video-popup-styles.css', array(), KBP_VERSION );
 		//wp_enqueue_style( 'kadence-blocks-pro-style-css', KBP_URL . 'dist/blocks.style.build.css', array(), KBP_VERSION );
 
 		wp_register_script( 'kadence-modal', KBP_URL . 'dist/kt-modal-init.js', array(), KBP_VERSION, true );
@@ -1810,6 +1810,12 @@ class Kadence_Blocks_Pro_Frontend {
 				$css .= '}';
 			}
 		}
+		if ( ! empty( $attr['maxWidth'] ) ) {
+			$css .= '.kb-section-dir-horizontal > .kt-inside-inner-col > .kadence-video-popup' . $unique_id . '{';
+			$css .= 'max-width:' . $attr['maxWidth'] . 'px;';
+			$css .= 'width:100%;';
+			$css .= '}';
+		}
 		$css .= '.kadence-video-popup' . $unique_id . '{';
 		if ( isset( $attr['padding'] ) && is_array( $attr['padding'] ) && is_array( $attr['padding'][0] ) ) {
 			$padding = $attr['padding'][0];
@@ -1990,6 +1996,10 @@ class Kadence_Blocks_Pro_Frontend {
 			$css .= 'max-width:' . $attr['maxWidth'] . ( ! empty( $attr['maxWidthUnit'] ) ? $attr['maxWidthUnit'] : 'px' ) . ';';
 			$css .= 'width:100%;';
 			$css .= '}';
+			$css .= '.kb-section-dir-horizontal > .kt-inside-inner-col > .kt-img-overlay' . $unique_id . ' {';
+			$css .= 'margin-left:unset;';
+			$css .= 'margin-right:unset;';
+			$css .= '}';
 		} elseif ( isset( $attr['imgWidth'] ) && ! empty( $attr['imgWidth'] ) && ( ! isset( $align_prop ) || ( isset( $align_prop ) && 'wide' !== $align_prop && 'full' !== $align_prop ) ) ) {
 			$css .= '.kt-img-overlay' . $unique_id . ' .kt-image-overlay-wrap {';
 			$css .= 'max-width:' . $attr['imgWidth'] . 'px;';
@@ -2041,7 +2051,7 @@ class Kadence_Blocks_Pro_Frontend {
 		}
 		if ( isset( $attr['subtitleSize'] ) || isset( $attr['subtitleLineHeight'] ) || isset( $attr['sfontWeight'] ) || isset( $attr['stypography'] ) || isset( $attr['sTextTransform'] ) || isset( $attr['sletterSpacing'] ) ) {
 			$css .= '.kt-img-overlay' . $unique_id . ' .kt-image-overlay-message .image-overlay-subtitle {';
-				if ( isset( $attr['subtitleSize'] ) && is_array( $attr['subtitleSize'] ) && !empty( $attr['subtitleSize'][ 0 ] ) ) {
+				if ( isset( $attr['subtitleSize'] ) && is_array( $attr['subtitleSize'] ) && ! empty( $attr['subtitleSize'][ 0 ] ) ) {
 					$css .= 'font-size:' . $attr['subtitleSize'][0] . ( ! isset( $attr['subSizeType'] ) ? 'px' : $attr['subSizeType'] ) . ';';
 				}
 				if ( isset( $attr['subtitleLineHeight'] ) && is_array( $attr['subtitleLineHeight'] ) && !empty( $attr['subtitleLineHeight'][ 0 ] ) ) {

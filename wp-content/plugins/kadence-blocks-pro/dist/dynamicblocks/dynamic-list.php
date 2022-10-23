@@ -119,7 +119,7 @@ class Kadence_Blocks_Pro_Dynamic_List {
 			return;
 		}
 		// Lets register all the block styles.
-		wp_register_style( 'kadence-blocks-dynamic-list', KBP_URL . 'dist/build/style-block-css/dynamic-list-styles.css', array(), KBP_VERSION );		
+		wp_register_style( 'kadence-blocks-dynamic-list', KBP_URL . 'dist/build/block-css/style-dynamic-list-styles.css', array(), KBP_VERSION );		
 	}
 	/**
 	 * Register the dynamic block.
@@ -273,6 +273,10 @@ class Kadence_Blocks_Pro_Dynamic_List {
 						'items'   => array(
 							'type' => 'object',
 						),
+					),
+					'showAllFields' => array(
+						'type' => 'boolean',
+						'default' => false,
 					),
 				),
 				'render_callback' => array( $this, 'render_dynamic_list' ),

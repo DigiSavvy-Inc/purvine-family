@@ -104,7 +104,7 @@ final class Kadence_Theme_Pro {
 	private function setup_constants() {
 
 		if ( ! defined( 'KTP_VERSION' ) ) {
-			define( 'KTP_VERSION', '1.0.5' );
+			define( 'KTP_VERSION', '1.0.7' );
 		}
 
 		if ( ! defined( 'KTP_PLUGIN_FILE' ) ) {
@@ -147,6 +147,7 @@ final class Kadence_Theme_Pro {
 			require_once KTP_PATH . 'dist/conditional-headers.php';
 		}
 		if ( isset( $enabled ) && isset( $enabled['elements'] ) && true === $enabled['elements'] ) {
+			require_once KTP_PATH . 'dist/elements/duplicate-elements.php';
 			require_once KTP_PATH . 'dist/elements/elements-init.php';
 		}
 		if ( isset( $enabled ) && isset( $enabled['header_addons'] ) && true === $enabled['header_addons'] ) {

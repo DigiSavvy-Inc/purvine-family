@@ -142,7 +142,7 @@ class Kadence_Blocks_Pro_Dynamic_HTML_Block {
 			return;
 		}
 		// Lets register all the block styles.
-		wp_register_style( 'kadence-blocks-dynamic-html', KBP_URL . 'dist/build/style-block-css/dynamic-html-styles.css', array(), KBP_VERSION );
+		wp_register_style( 'kadence-blocks-dynamic-html', KBP_URL . 'dist/build/block-css/style-dynamic-html-styles.css', array(), KBP_VERSION );
 	}
 	/**
 	 * Register the dynamic block.
@@ -184,6 +184,14 @@ class Kadence_Blocks_Pro_Dynamic_HTML_Block {
 						'default' => '',
 					),
 					'customMeta' => array(
+						'type' => 'string',
+						'default' => '',
+					),
+					'relate' => array(
+						'type' => 'string',
+						'default' => '',
+					),
+					'relcustom' => array(
 						'type' => 'string',
 						'default' => '',
 					),
@@ -453,6 +461,10 @@ class Kadence_Blocks_Pro_Dynamic_HTML_Block {
 						'type' => 'boolean',
 						'default' => false,
 					),
+					'showAllFields' => array(
+						'type' => 'boolean',
+						'default' => false,
+					),
 				),
 				'render_callback' => array( $this, 'render_dynamic_content' ),
 				'editor_script'   => 'kadence-blocks-pro-js',
@@ -492,23 +504,26 @@ class Kadence_Blocks_Pro_Dynamic_HTML_Block {
 		}
 		global $post;
 		// Current || Post id.
-		$source = ! empty( $attributes['source'] ) ? $attributes['source'] : $post->ID;
+		$source = ! empty( $attributes['source'] ) ? $attributes['source'] : '';
 		$field_src = ! empty( $attributes['field'] ) ? $attributes['field'] : '';
 		// Bail if nothing to show.
 		if ( empty( $field_src ) ) {
 			return '';
 		}
-		if ( isset( self::$seen_ids[ $source ] ) && 'post|post_content' === $field_src ) {
-			$is_debug = defined( 'WP_DEBUG' ) && WP_DEBUG &&
-			defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY;
-
-			return $is_debug ?
-				// translators: Visible only in the front end, this warning takes the place of a faulty block.
-				__( '[block rendering halted, block creates an endless loop]', 'kadence_blocks_pro' ) :
-				'';
-		}
 		if ( 'post|post_content' === $field_src ) {
-			self::$seen_ids[ $source ] = true;
+			$source = ! empty( $source ) ? $source : $post->ID;
+			if ( isset( self::$seen_ids[ $source ] ) ) {
+				$is_debug = defined( 'WP_DEBUG' ) && WP_DEBUG &&
+				defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY;
+
+				return $is_debug ?
+					// translators: Visible only in the front end, this warning takes the place of a faulty block.
+					__( '[block rendering halted, block creates an endless loop]', 'kadence_blocks_pro' ) :
+					'';
+			}
+			if ( 'post|post_content' === $field_src ) {
+				self::$seen_ids[ $source ] = true;
+			}
 		}
 		$group = 'post';
 		if ( ! empty( $field_src ) && strpos( $field_src, '|' ) !== false ) {
@@ -523,6 +538,8 @@ class Kadence_Blocks_Pro_Dynamic_HTML_Block {
 			'field'        => $field,
 			'custom'       => ! empty( $attributes['customMeta'] ) ? $attributes['customMeta'] : '',
 			'para'         => ! empty( $attributes['metaField'] ) ? $attributes['metaField'] : '',
+			'relate'       => ! empty( $attributes['relate'] ) ? $attributes['relate'] : '',
+			'relcustom'    => ! empty( $attributes['relcustom'] ) ? $attributes['relcustom'] : '',
 		);
 		$dynamic_class = Kadence_Blocks_Pro_Dynamic_Content::get_instance();
 		$the_content   = $dynamic_class->get_content( $args );

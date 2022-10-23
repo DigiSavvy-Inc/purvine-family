@@ -436,7 +436,7 @@ class Header_Addons {
 		$css->set_selector( '.transparent-header #main-header .header-html2 a:hover, .mobile-transparent-header .mobile-html2 a:hover' );
 		$css->add_property( 'color', $css->render_color( kadence()->sub_option( 'transparent_header_html2_color', 'hover' ) ) );
 		// Tertiary Navigation.
-		$css->set_selector( '.tertiary-navigation .tertiary-menu-container > ul > li > a' );
+		$css->set_selector( '.tertiary-navigation .tertiary-menu-container > ul > li.menu-item > a' );
 		$css->add_property( 'padding-left', $css->render_half_size( kadence()->option( 'tertiary_navigation_spacing' ) ) );
 		$css->add_property( 'padding-right', $css->render_half_size( kadence()->option( 'tertiary_navigation_spacing' ) ) );
 		if ( kadence()->option( 'tertiary_navigation_style' ) === 'standard' || kadence()->option( 'tertiary_navigation_style' ) === 'underline' ) {
@@ -445,16 +445,16 @@ class Header_Addons {
 		}
 		$css->add_property( 'color', $css->render_color( kadence()->sub_option( 'tertiary_navigation_color', 'color' ) ) );
 		$css->add_property( 'background', $css->render_color( kadence()->sub_option( 'tertiary_navigation_background', 'color' ) ) );
-		$css->set_selector( '.tertiary-navigation .tertiary-menu-container > ul li a' );
+		$css->set_selector( '.tertiary-navigation .tertiary-menu-container > ul li.menu-item a' );
 		$css->render_font( kadence()->option( 'tertiary_navigation_typography' ), $css );
-		$css->set_selector( '.tertiary-navigation .tertiary-menu-container > ul > li > a:hover' );
+		$css->set_selector( '.tertiary-navigation .tertiary-menu-container > ul > li.menu-item > a:hover' );
 		$css->add_property( 'color', $css->render_color( kadence()->sub_option( 'tertiary_navigation_color', 'hover' ) ) );
 		$css->add_property( 'background', $css->render_color( kadence()->sub_option( 'tertiary_navigation_background', 'hover' ) ) );
-		$css->set_selector( '.tertiary-navigation .tertiary-menu-container > ul > li.current-menu-item > a' );
+		$css->set_selector( '.tertiary-navigation .tertiary-menu-container > ul > li.menu-item.current-menu-item > a' );
 		$css->add_property( 'color', $css->render_color( kadence()->sub_option( 'tertiary_navigation_color', 'active' ) ) );
 		$css->add_property( 'background', $css->render_color( kadence()->sub_option( 'tertiary_navigation_background', 'active' ) ) );
 		// Quaternary Navigation.
-		$css->set_selector( '.quaternary-navigation .quaternary-menu-container > ul > li > a' );
+		$css->set_selector( '.quaternary-navigation .quaternary-menu-container > ul > li.menu-item > a' );
 		$css->add_property( 'padding-left', $css->render_half_size( kadence()->option( 'quaternary_navigation_spacing' ) ) );
 		$css->add_property( 'padding-right', $css->render_half_size( kadence()->option( 'quaternary_navigation_spacing' ) ) );
 		if ( kadence()->option( 'quaternary_navigation_style' ) === 'standard' || kadence()->option( 'quaternary_navigation_style' ) === 'underline' ) {
@@ -463,12 +463,12 @@ class Header_Addons {
 		}
 		$css->add_property( 'color', $css->render_color( kadence()->sub_option( 'quaternary_navigation_color', 'color' ) ) );
 		$css->add_property( 'background', $css->render_color( kadence()->sub_option( 'quaternary_navigation_background', 'color' ) ) );
-		$css->set_selector( '.quaternary-navigation .quaternary-menu-container > ul li a' );
+		$css->set_selector( '.quaternary-navigation .quaternary-menu-container > ul li.menu-item a' );
 		$css->render_font( kadence()->option( 'quaternary_navigation_typography' ), $css );
-		$css->set_selector( '.quaternary-navigation .quaternary-menu-container > ul > li > a:hover' );
+		$css->set_selector( '.quaternary-navigation .quaternary-menu-container > ul > li.menu-item > a:hover' );
 		$css->add_property( 'color', $css->render_color( kadence()->sub_option( 'quaternary_navigation_color', 'hover' ) ) );
 		$css->add_property( 'background', $css->render_color( kadence()->sub_option( 'quaternary_navigation_background', 'hover' ) ) );
-		$css->set_selector( '.quaternary-navigation .quaternary-menu-container > ul > li.current-menu-item > a' );
+		$css->set_selector( '.quaternary-navigation .quaternary-menu-container > ul > li.menu-item.current-menu-item > a' );
 		$css->add_property( 'color', $css->render_color( kadence()->sub_option( 'quaternary_navigation_color', 'active' ) ) );
 		$css->add_property( 'background', $css->render_color( kadence()->sub_option( 'quaternary_navigation_background', 'active' ) ) );
 		// Header divider.

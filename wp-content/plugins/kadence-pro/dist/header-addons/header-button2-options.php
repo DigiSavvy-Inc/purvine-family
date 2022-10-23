@@ -390,7 +390,7 @@ Theme_Customizer::add_settings(
 		'header_button2_shadow' => array(
 			'control_type' => 'kadence_shadow_control',
 			'section'      => 'header_button2_design',
-			'label'        => esc_html__( 'Button Shadow', 'kadence' ),
+			'label'        => esc_html__( 'Button Shadow', 'kadence-pro' ),
 			'live_method'     => array(
 				array(
 					'type'     => 'css_boxshadow',
@@ -405,7 +405,7 @@ Theme_Customizer::add_settings(
 		'header_button2_shadow_hover' => array(
 			'control_type' => 'kadence_shadow_control',
 			'section'      => 'header_button2_design',
-			'label'        => esc_html__( 'Button Hover State Shadow', 'kadence' ),
+			'label'        => esc_html__( 'Button Hover State Shadow', 'kadence-pro' ),
 			'live_method'     => array(
 				array(
 					'type'     => 'css_boxshadow',

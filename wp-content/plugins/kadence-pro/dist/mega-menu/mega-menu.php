@@ -27,7 +27,7 @@ class Mega_Menu {
 	 *
 	 * @var null
 	 */
-	private static $css = '';
+	public static $css = '';
 
 	/**
 	 * Instance Control.
@@ -227,6 +227,8 @@ class Mega_Menu {
 				$data['mega_menu_custom_width'] = get_post_meta( $item->ID, '_kad_mega_menu_custom_width', true );
 				$css->set_selector( '#menu-item-' . $item->ID . '.kadence-menu-mega-enabled > .sub-menu' );
 				$css->add_property( 'width', ( $data['mega_menu_custom_width'] ? $data['mega_menu_custom_width'] : '400' ) . 'px' );
+				$css->set_selector( '.header-navigation[class*="header-navigation-dropdown-animation-fade"] #menu-item-' . $item->ID . '.kadence-menu-mega-enabled > .sub-menu' );
+				$css->add_property( 'margin-left', '-' . ( $data['mega_menu_custom_width'] ? floor( $data['mega_menu_custom_width'] / 2 ) : '400' ) . 'px' );
 			}
 			$data['menu_dropdown_background'] = json_decode( get_post_meta( $item->ID, '_kad_menu_dropdown_background', true ), true );
 			if ( is_array( $data['menu_dropdown_background'] ) ) {
@@ -476,7 +478,7 @@ class Mega_Menu {
 			return;
 		}
 		require_once KTP_PATH . 'dist/mega-menu/fa-icons.php'; // phpcs:ignore WPThemeReview.CoreFunctionality.FileInclude.FileIncludeFound
-		wp_enqueue_style( 'kadence-pro-mega',  KTP_URL . 'build/mega-menu-controls.min.css', array( 'wp-components' ), KTP_VERSION );
+		wp_enqueue_style( 'kadence-pro-mega',  KTP_URL . 'dist/build/mega-menu-controls.min.css', array( 'wp-components' ), KTP_VERSION );
 		wp_enqueue_script( 'kadence-pro-mega', KTP_URL . 'build/mega-menu.js', array( 'wp-i18n', 'wp-element', 'wp-plugins', 'wp-components', 'wp-api', 'wp-hooks', 'wp-edit-post', 'lodash', 'wp-block-library', 'wp-block-editor', 'wp-editor', 'jquery' ), KTP_VERSION, true );
 		$settings = array(
 			'disableCustomColors'    => get_theme_support( 'disable-custom-colors' ),
@@ -503,6 +505,9 @@ class Mega_Menu {
 				'elements'   => wp_json_encode( $this->get_hooked_elements() ),
 			)
 		);
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			wp_set_script_translations( 'kadence-pro-mega', 'kadence-pro' );
+		}
 	}
 	/**
 	 * Get All elements.

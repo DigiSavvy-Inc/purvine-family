@@ -856,8 +856,8 @@ class Conditional_Headers {
 			'wp-primitives',
 		);
 		$path = KTP_URL . 'build/';
-		wp_enqueue_script( 'kadence-pro-customizer-controls', $path . '/customizer.js', $editor_dependencies, KTP_VERSION, true );
-		wp_enqueue_style( 'kadence-conditional-controls', $path . 'customizer-controls.css', false, KTP_VERSION );
+		wp_enqueue_script( 'kadence-pro-customizer-controls', $path . 'customizer.js', $editor_dependencies, KTP_VERSION, true );
+		wp_enqueue_style( 'kadence-conditional-controls', KTP_URL . '/dist/build/customizer-controls.css', false, KTP_VERSION );
 		wp_localize_script(
 			'kadence-pro-customizer-controls',
 			'kadenceCustomizerConditionalData',
@@ -870,7 +870,7 @@ class Conditional_Headers {
 				'timeFormat' => get_option('time_format'),
 				'restBase'           => esc_url_raw( get_rest_url() ),
 				'postSelectEndpoint' => '/ktp/v1/post-select',
-				'resetConfirm'   => __( "Attention! This will remove all customizations to this header!\n\nThis action is irreversible!", 'kadence' ),
+				'resetConfirm'   => __( "Attention! This will remove all customizations to this header!\n\nThis action is irreversible!", 'kadence-pro' ),
 				'emptyImport'	 => __( 'Please choose a file to import.', 'kadence-pro' ),
 				'conditional_url'	 => admin_url( 'customize.php' ) . '?autofocus%5Bsection%5D=kadence_customizer_conditional_header',
 				'header_url'	 => admin_url( 'customize.php' ) . '?autofocus%5Bpanel%5D=kadence_customizer_header',
@@ -881,6 +881,9 @@ class Conditional_Headers {
 				),
 			)
 		);
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			wp_set_script_translations( 'kadence-pro-customizer-controls', 'kadence-pro' );
+		}
 	}
 	/**
 	 * Get all language Options

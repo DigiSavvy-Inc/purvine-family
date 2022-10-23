@@ -63,6 +63,9 @@
 					scrollSxs = 1;
 					scrollSss = 1;
 				}
+				if ( ! splideSliders[ i ].firstChild ) {
+					return;
+				}
 				splideSliders[ i ].firstChild.classList.add( 'splide__list' );
 				for ( let n = 0; n < splideSliders[ i ].firstChild.children.length; n++ ) {
 					splideSliders[ i ].firstChild.children[ n ].classList.add( 'splide__slide' );

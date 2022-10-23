@@ -54,7 +54,7 @@ $settings = array(
 		'control_type' => 'kadence_conditional_control',
 		'section'      => 'conditional_header',
 		'default'      => kadence()->default( 'conditional_headers' ),
-		'label'        => esc_html__( 'Conditional Headers', 'kadence' ),
+		'label'        => esc_html__( 'Conditional Headers', 'kadence-pro' ),
 	),
 );
 

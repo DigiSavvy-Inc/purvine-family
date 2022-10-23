@@ -14,7 +14,7 @@ use function Kadence\kadence;
  */
 function mobile_secondary_navigation() {
 	?>
-	<nav id="mobile-secondary-site-navigation" class="mobile-navigation mobile-secondary-navigation drawer-navigation drawer-navigation-parent-toggle-<?php echo esc_attr( kadence()->option( 'mobile_secondary_navigation_parent_toggle' ) ? 'true' : 'false' ); ?>" role="navigation" aria-label="<?php esc_attr_e( 'Secondary Mobile Navigation', 'kadence' ); ?>">
+	<nav id="mobile-secondary-site-navigation" class="mobile-navigation mobile-secondary-navigation drawer-navigation drawer-navigation-parent-toggle-<?php echo esc_attr( kadence()->option( 'mobile_secondary_navigation_parent_toggle' ) ? 'true' : 'false' ); ?>" role="navigation" aria-label="<?php esc_attr_e( 'Secondary Mobile Navigation', 'kadence-pro' ); ?>">
 		<?php kadence()->customizer_quick_link(); ?>
 		<div class="mobile-menu-container drawer-menu-container">
 			<?php

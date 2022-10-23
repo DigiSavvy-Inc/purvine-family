@@ -100,7 +100,7 @@ class Kadence_Blocks_Pro_Post_Grid {
 			return;
 		}
 		// Lets register all the block styles.
-		wp_register_style( 'kadence-blocks-post-grid', KBP_URL . 'dist/build/style-block-css/post-grid-styles.css', array(), KBP_VERSION );
+		wp_register_style( 'kadence-blocks-post-grid', KBP_URL . 'dist/build/block-css/style-post-grid-styles.css', array(), KBP_VERSION );
 		wp_register_script( 'kadence-blocks-isotope', KBP_URL . 'dist/vendor/isotope.pkgd.min.js', array(), KBP_VERSION, true );
 		wp_register_script( 'kadence-blocks-pro-iso-init', KBP_URL . 'dist/kb-iso-init.js', array( 'kadence-blocks-isotope' ), KBP_VERSION, true );
 		wp_register_script( 'kadence-blocks-pro-iso-post-init', KBP_URL . 'dist/kb-iso-post-init.js', array( 'kadence-blocks-isotope' ), KBP_VERSION, true );
@@ -1465,7 +1465,7 @@ class Kadence_Blocks_Pro_Post_Grid {
 							}
 						}
 					}
-					echo '<div class="kt-post-masonry-item' . esc_attr( $tax_filter_classes ) . '">';
+					echo '<div class="' . esc_attr( implode( ' ', get_post_class( 'kt-post-masonry-item' . $tax_filter_classes ) ) ) . '">';
 				} else if ( 'grid' === $layout && isset( $attributes['displayFilter'] ) && true === $attributes['displayFilter'] && ( ! isset( $attributes['pagination'] ) || isset( $attributes['pagination'] ) && false === $attributes['pagination'] ) ) {
 					$tax_filter_classes = '';
 					if ( isset( $attributes['filterTaxType'] ) && ! empty( $attributes['filterTaxType'] ) ) {
@@ -1477,9 +1477,9 @@ class Kadence_Blocks_Pro_Post_Grid {
 							}
 						}
 					}
-					echo '<div class="kt-post-masonry-item' . esc_attr( $tax_filter_classes ) . '">';
+					echo '<div class="' . esc_attr( implode( ' ', get_post_class( 'kt-post-masonry-item' . $tax_filter_classes ) ) ) . '">';
 				} else if ( 'carousel' === $layout || 'fluidcarousel' === $layout ) {
-					echo '<div class="kt-post-slider-item">';
+					echo '<div class="' . esc_attr( implode( ' ', get_post_class( 'kt-post-slider-item' ) ) ) . '">';
 				}
 					$this->render_post_block_loop( $attributes );
 				if ( 'grid' !== $layout ) {
@@ -1518,7 +1518,12 @@ class Kadence_Blocks_Pro_Post_Grid {
 		$image_align        = ( isset( $attributes['alignImage'] ) && isset( $attributes['displayImage'] ) && true === $attributes['displayImage'] && has_post_thumbnail() ? $attributes['alignImage'] : 'none' );
 		$footer_bottom_align = ( isset( $attributes['layout'] ) && 'masonry' !== $attributes['layout'] && isset( $attributes['footerAlignBottom'] ) && true === $attributes['footerAlignBottom'] ? ' kb-post-footer-bottom-align' : '' );
 		$image_mobile_align  = ( isset( $attributes['sideImageMoveAboveMobile'] ) && true === $attributes['sideImageMoveAboveMobile'] ? 'kt-feat-image-mobile-align-top' : 'kt-feat-image-mobile-align-side' );
-		echo '<article class="kt-blocks-post-grid-item">';
+		if ( isset( $attributes['layout'] ) && 'grid' === $attributes['layout'] && isset( $attributes['displayFilter'] ) && false === $attributes['displayFilter'] ) {
+			$post_classes = get_post_class( 'kt-blocks-post-grid-item' );
+		} else {
+			$post_classes = array( 'kt-blocks-post-grid-item' );
+		}
+		echo '<article class="' . esc_attr( implode( ' ', $post_classes ) ) . '">';
 			echo '<div class="kt-blocks-post-grid-item-inner-wrap kt-feat-image-align-' . esc_attr( $image_align ) . ' ' . esc_attr( $image_mobile_align ) . esc_attr( $footer_bottom_align ) . '">';
 				/**
 				 * Kadence Blocks Post Loop Start

@@ -284,7 +284,7 @@ Theme_Customizer::add_settings(
 			'section'      => 'header_dark_mode',
 			'priority'     => 20,
 			'default'      => kadence()->default( 'header_dark_mode_switch_margin' ),
-			'label'        => esc_html__( 'Margin', 'kadence' ),
+			'label'        => esc_html__( 'Margin', 'kadence-pro' ),
 			'live_method'     => array(
 				array(
 					'type'     => 'css',

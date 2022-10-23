@@ -11,8 +11,8 @@ use Kadence\Theme_Customizer;
 use function Kadence\kadence;
 ob_start(); ?>
 <div class="kadence-compontent-info-box wp-clearfix">
-	<p><?php echo esc_html__( 'You must add or remove a product from your active cart to see your settings for this take place.', 'kadence' ); ?></p>
-	<p><?php echo esc_html__( 'Use {cart_difference} placeholder in message to output the amount needed for free shipping.', 'kadence' ); ?></p>
+	<p><?php echo esc_html__( 'You must add or remove a product from your active cart to see your settings for this take place.', 'kadence-pro' ); ?></p>
+	<p><?php echo esc_html__( 'Use {cart_difference} placeholder in message to output the amount needed for free shipping.', 'kadence-pro' ); ?></p>
 
 </div>
 <?php
@@ -54,7 +54,7 @@ Theme_Customizer::add_settings(
 			'sanitize'     => 'sanitize_text_field',
 			'priority'     => 21,
 			'default'      => kadence()->default( 'cart_pop_free_shipping_price' ),
-			'label'        => esc_html__( 'Amount needed for Free Shipping.', 'kadence' ),
+			'label'        => esc_html__( 'Amount needed for Free Shipping.', 'kadence-pro' ),
 			'transport'    => 'refresh',
 			'context'      => array(
 				array(
@@ -70,7 +70,7 @@ Theme_Customizer::add_settings(
 			'sanitize'     => 'sanitize_text_field',
 			'priority'     => 21,
 			'default'      => kadence()->default( 'cart_pop_free_shipping_message' ),
-			'label'        => esc_html__( 'Cart Notice Message', 'kadence' ),
+			'label'        => esc_html__( 'Cart Notice Message', 'kadence-pro' ),
 			'transport'    => 'refresh',
 			'context'      => array(
 				array(

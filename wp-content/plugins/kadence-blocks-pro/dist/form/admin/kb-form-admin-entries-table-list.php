@@ -39,8 +39,8 @@ class KB_Form_Admin_Entries_Table_List extends WP_List_Table {
 
 		parent::__construct(
 			array(
-				'singular' => __( 'Entry', 'kadence-blocks' ), //singular name of the listed records
-				'plural'   => __( 'Entries', 'kadence-blocks' ), //plural name of the listed records
+				'singular' => __( 'Entry', 'kadence-blocks-pro' ), //singular name of the listed records
+				'plural'   => __( 'Entries', 'kadence-blocks-pro' ), //plural name of the listed records
 				'ajax'     => false //should this table support ajax?.
 			)
 		);
@@ -202,7 +202,7 @@ class KB_Form_Admin_Entries_Table_List extends WP_List_Table {
 	 * Text displayed when no entry data is available
 	 */
 	public function no_items() {
-		esc_html_e( 'No entries avaliable.', 'kadence-blocks' );
+		esc_html_e( 'No entries avaliable.', 'kadence-blocks-pro' );
 	}
 	/**
 	 * Render the bulk edit checkbox
@@ -398,12 +398,12 @@ class KB_Form_Admin_Entries_Table_List extends WP_List_Table {
 	public function get_columns() {
 		$columns = array(
 			'cb'      => '<input type="checkbox" />',
-			'id'      => __( 'Actions', 'kadence-blocks' ),
-			'form_id' => __( 'Form ID', 'kadence-blocks' ),
-			'date'    => __( 'Date Created', 'kadence-blocks' ),
-			'name'    => __( 'Form Name', 'kadence-blocks' ),
-			'field_1' => __( 'First Field', 'kadence-blocks' ),
-			'field_2' => __( 'Second Field', 'kadence-blocks' ),
+			'id'      => __( 'Actions', 'kadence-blocks-pro' ),
+			'form_id' => __( 'Form ID', 'kadence-blocks-pro' ),
+			'date'    => __( 'Date Created', 'kadence-blocks-pro' ),
+			'name'    => __( 'Form Name', 'kadence-blocks-pro' ),
+			'field_1' => __( 'First Field', 'kadence-blocks-pro' ),
+			'field_2' => __( 'Second Field', 'kadence-blocks-pro' ),
 		);
 
 		return $columns;

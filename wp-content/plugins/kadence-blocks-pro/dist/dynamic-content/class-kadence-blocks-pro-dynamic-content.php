@@ -98,7 +98,7 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 		}
 
 		add_shortcode( self::SHORTCODE, array( $this, 'dynamic_shortcode_render' ) );
-		add_filter( 'render_block', array( $this, 'render_blocks' ), 10, 2 );
+		add_filter( 'render_block', array( $this, 'render_blocks' ), 10, 3 );
 		//add_action( 'wp_enqueue_scripts', array( $this, 'frontend_head_css' ), 5 );
 		add_filter( 'kadence_blocks_column_render_block_attributes', array( $this, 'update_background_image' ) );
 		add_filter( 'kadence_blocks_rowlayout_render_block_attributes', array( $this, 'update_background_image' ) );
@@ -108,98 +108,6 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 		add_filter( 'kadence_blocks_video_render_block_attributes', array( $this, 'update_custom_ratio_video_popup_image' ) );
 		add_filter( 'kadence_blocks_render_head_css', array( $this, 'prevent_render_in_head_for_query_blocks' ), 10, 3 );
 		add_filter( 'kadence_blocks_force_render_inline_css_in_content', array( $this, 'prevent_css_enqueuing_blocks_in_query' ), 10, 3 );
-		if ( ! is_admin() ) {
-			add_action( 'render_block', array( $this, 'conditionally_render_block' ), 6, 2 );
-		}
-	}
-	/**
-	 * Check for logged in, logged out visibility settings.
-	 *
-	 * @param mixed $block_content The block content.
-	 * @param array $block The block data.
-	 *
-	 * @return mixed Returns the block content.
-	 */
-	public function conditionally_render_block( $block_content, $block ) {
-		if ( ! empty( $block['attrs']['kadenceConditional']['postData'] ) && isset( $block['attrs']['kadenceConditional']['postData']['enable'] ) && $block['attrs']['kadenceConditional']['postData']['enable'] ) {
-			$conditional_data = $block['attrs']['kadenceConditional']['postData'];
-			$hide = true;
-			if ( ! empty( $conditional_data['field'] ) && strpos( $conditional_data['field'], '|' ) !== false ) {
-				$field_split = explode( '|', $conditional_data['field'], 2 );
-				$group = ( isset( $field_split[0] ) && ! empty( $field_split[0] ) ? $field_split[0] : 'post' );
-				$field = ( isset( $field_split[1] ) && ! empty( $field_split[1] ) ? $field_split[1] : '' );
-			} else {
-				$field = '';
-				$group = '';
-			}
-			$args = array(
-				'source'       => $conditional_data['source'],
-				'origin'       => 'core',
-				'group'        => $group,
-				'type'         => 'conditional',
-				'field'        => $field,
-				'custom'       => $conditional_data['custom'],
-				'para'         => $conditional_data['para'],
-				'force-string' => true,
-			);
-			$condition_data = $this->get_content( $args );
-			switch ( $conditional_data['compare'] ) {
-				case 'not_empty':
-					if ( ! empty( $condition_data ) ) {
-						$hide = false;
-					}
-					break;
-				case 'is_empty':
-					if ( empty( $condition_data ) ) {
-						$hide = false;
-					}
-					break;
-				case 'is_true':
-					if ( $condition_data == true ) {
-						$hide = false;
-					}
-					break;
-				case 'is_false':
-					if ( $condition_data == false ) {
-						$hide = false;
-					}
-					break;
-				case 'equals':
-					if ( $condition_data == $conditional_data['condition'] ) {
-						$hide = false;
-					}
-					break;
-				case 'not_equals':
-					if ( $condition_data != $conditional_data['condition'] ) {
-						$hide = false;
-					}
-					break;
-				case 'equals_or_greater':
-					if ( $condition_data >= $conditional_data['condition'] ) {
-						$hide = false;
-					}
-					break;
-				case 'equals_or_less':
-					if ( $condition_data <= $conditional_data['condition'] ) {
-						$hide = false;
-					}
-					break;
-				case 'greater':
-					if ( $condition_data > $conditional_data['condition'] ) {
-						$hide = false;
-					}
-					break;
-				case 'less':
-					if ( $condition_data < $conditional_data['condition'] ) {
-						$hide = false;
-					}
-					break;
-			}
-			if ( $hide ) {
-				return '';
-			}
-		}
-		return $block_content;
 	}
 	/**
 	 * Outputs extra css for blocks.
@@ -235,7 +143,7 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 	public function blocks_cycle_through_query( $inner_blocks ) {
 		foreach ( $inner_blocks as $in_indexkey => $inner_block ) {
 			if ( ! is_object( $inner_block ) && is_array( $inner_block ) && isset( $inner_block['blockName'] ) ) {
-				$trigger_blocks = array( 'kadence/videopopup', 'kadence/rowlayout', 'kadence/column', 'kadence/infobox', 'kadence/modal', 'kadence/imageoverlay', 'kadence/splitcontent' );
+				$trigger_blocks = array( 'kadence/videopopup', 'kadence/rowlayout', 'kadence/column', 'kadence/infobox', 'kadence/modal', 'kadence/show-more', 'kadence/imageoverlay', 'kadence/splitcontent' );
 				if ( in_array( $inner_block['blockName'], $trigger_blocks ) ) {
 					if ( isset( $inner_block['attrs'] ) && is_array( $inner_block['attrs'] ) && ! empty( $inner_block['attrs']['uniqueID'] ) ) {
 						self::$render_inline[] = $inner_block['attrs']['uniqueID'];
@@ -277,7 +185,7 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 	 * Prevent rendering CSS in header for some blocks.
 	 */
 	public function prevent_render_in_head_for_query_blocks( $bool, $name, $attributes ) {
-		if ( isset( $attributes['inQueryBlock'] ) && $attributes['inQueryBlock'] && ( ( isset( $attributes['kadenceDynamic'] ) && is_array( $attributes['kadenceDynamic'] ) ) || 'modal' == $name ) ) {
+		if ( isset( $attributes['inQueryBlock'] ) && $attributes['inQueryBlock'] && ( ( isset( $attributes['kadenceDynamic'] ) && is_array( $attributes['kadenceDynamic'] ) ) || 'modal' == $name || ( isset( $attributes['inQueryBlock'] ) && $attributes['inQueryBlock'] && 'show-more' == $name ) ) ) {
 			self::$render_inline[] = $attributes['uniqueID'];
 			return false;
 		}
@@ -521,10 +429,89 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 	 *
 	 * @param string $block_content The block content.
 	 * @param array  $block The block info.
+	 * @param object $wp_block The block class object.
 	 */
-	public function render_blocks( $block_content, $block ) {
+	public function render_blocks( $block_content, $block, $wp_block ) {
 		if ( is_admin() ) {
 			return $block_content;
+		}
+		if ( ! empty( $block['attrs']['kadenceConditional']['postData'] ) && isset( $block['attrs']['kadenceConditional']['postData']['enable'] ) && $block['attrs']['kadenceConditional']['postData']['enable'] ) {
+			$conditional_data = $block['attrs']['kadenceConditional']['postData'];
+			$hide = true;
+			if ( ! empty( $conditional_data['field'] ) && strpos( $conditional_data['field'], '|' ) !== false ) {
+				$field_split = explode( '|', $conditional_data['field'], 2 );
+				$group = ( isset( $field_split[0] ) && ! empty( $field_split[0] ) ? $field_split[0] : 'post' );
+				$field = ( isset( $field_split[1] ) && ! empty( $field_split[1] ) ? $field_split[1] : '' );
+			} else {
+				$field = '';
+				$group = '';
+			}
+			$args = array(
+				'source'       => $conditional_data['source'],
+				'origin'       => 'core',
+				'group'        => $group,
+				'type'         => 'conditional',
+				'field'        => $field,
+				'custom'       => $conditional_data['custom'],
+				'para'         => $conditional_data['para'],
+				'force-string' => true,
+			);
+			$condition_data = $this->get_content( $args );
+			switch ( $conditional_data['compare'] ) {
+				case 'not_empty':
+					if ( ! empty( $condition_data ) ) {
+						$hide = false;
+					}
+					break;
+				case 'is_empty':
+					if ( empty( $condition_data ) ) {
+						$hide = false;
+					}
+					break;
+				case 'is_true':
+					if ( $condition_data == true ) {
+						$hide = false;
+					}
+					break;
+				case 'is_false':
+					if ( $condition_data == false ) {
+						$hide = false;
+					}
+					break;
+				case 'equals':
+					if ( $condition_data == $conditional_data['condition'] ) {
+						$hide = false;
+					}
+					break;
+				case 'not_equals':
+					if ( $condition_data != $conditional_data['condition'] ) {
+						$hide = false;
+					}
+					break;
+				case 'equals_or_greater':
+					if ( $condition_data >= $conditional_data['condition'] ) {
+						$hide = false;
+					}
+					break;
+				case 'equals_or_less':
+					if ( $condition_data <= $conditional_data['condition'] ) {
+						$hide = false;
+					}
+					break;
+				case 'greater':
+					if ( $condition_data > $conditional_data['condition'] ) {
+						$hide = false;
+					}
+					break;
+				case 'less':
+					if ( $condition_data < $conditional_data['condition'] ) {
+						$hide = false;
+					}
+					break;
+			}
+			if ( $hide ) {
+				return '';
+			}
 		}
 		if ( 'kadence/rowlayout' === $block['blockName'] ) {
 			if ( isset( $block['attrs'] ) && is_array( $block['attrs'] ) ) {
@@ -538,6 +525,13 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 				$blockattr = $block['attrs'];
 				if ( isset( $blockattr['inQueryBlock'] ) && $blockattr['inQueryBlock'] && isset( $blockattr['kadenceDynamic'] ) && is_array( $blockattr['kadenceDynamic'] ) ) {
 					$block_content = str_replace( 'kadence-column' . $blockattr['uniqueID'], 'kadence-column' . $blockattr['uniqueID'] . get_the_ID(), $block_content );
+				}
+			}
+		} else if ( 'kadence/show-more' === $block['blockName'] ) {
+			if ( isset( $block['attrs'] ) && is_array( $block['attrs'] ) ) {
+				$blockattr = $block['attrs'];
+				if ( isset( $blockattr['inQueryBlock'] ) && $blockattr['inQueryBlock'] ) {
+					$block_content = str_replace( 'kb-block-show-more-container' . $blockattr['uniqueID'], 'kb-block-show-more-container' . $blockattr['uniqueID'] . get_the_ID(), $block_content );
 				}
 			}
 		} else if ( 'kadence/modal' === $block['blockName'] ) {
@@ -596,8 +590,9 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 			if ( isset( $block['attrs'] ) && is_array( $block['attrs'] ) ) {
 				$blockattr = $block['attrs'];
 				if ( isset( $blockattr['kadenceDynamic'] ) && is_array( $blockattr['kadenceDynamic'] ) && isset( $blockattr['kadenceDynamic']['url'] ) && is_array( $blockattr['kadenceDynamic']['url'] ) && isset( $blockattr['kadenceDynamic']['url']['enable'] ) && $blockattr['kadenceDynamic']['url']['enable'] ) {
+					$regx = '/<img.*?class=["\'].*kb-img.*["\'].*\/>/U';
 					$block_content = preg_replace_callback(
-						'/<img.*?class=["\'].*kb-img.*["\']\/>/U',
+						$regx,
 						function ( $matches ) use ( $blockattr ) {
 							$content = '';
 							if ( ! empty( $blockattr['kadenceDynamic']['url']['field'] ) && strpos( $blockattr['kadenceDynamic']['url']['field'], '|' ) !== false ) {
@@ -637,6 +632,10 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 			if ( isset( $block['attrs'] ) && is_array( $block['attrs'] ) ) {
 				$blockattr = $block['attrs'];
 				if ( isset( $blockattr['kadenceDynamic'] ) && is_array( $blockattr['kadenceDynamic'] ) && isset( $blockattr['kadenceDynamic']['images'] ) && is_array( $blockattr['kadenceDynamic']['images'] ) && isset( $blockattr['kadenceDynamic']['images']['enable'] ) && $blockattr['kadenceDynamic']['images']['enable'] ) {
+					$styles = '';
+					if ( preg_match( '/<style id="kb-advancedgallery' . $blockattr['uniqueID'] . '">(.*?)<\/style>/', $block_content, $match ) == 1 ) {
+						$styles = '<style>' . $match[1] . '</style>';
+					}
 					$content = '';
 					if ( ! empty( $blockattr['kadenceDynamic']['images']['field'] ) && strpos( $blockattr['kadenceDynamic']['images']['field'], '|' ) !== false ) {
 						$field_split = explode( '|', $blockattr['kadenceDynamic']['images']['field'], 2 );
@@ -782,7 +781,7 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 						}
 						$content .= '</div>';
 					}
-					$block_content = $content;
+					$block_content = $content . $styles;
 				}
 			}
 		} elseif ( 'kadence/videopopup' === $block['blockName'] ) {
@@ -950,7 +949,7 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 		$block_content = preg_replace_callback(
 			'/<span\s+((?:data-[\w\-]+=["\']+.*["\']+[\s]+)+)class=["\'].*kb-inline-dynamic.*["\']\s*>(.*)<\/span>/U',
 			function ( $matches ) {
-				$options = explode( ' ', str_replace( 'data-', '', $matches[1] ) );
+				$options = explode( '" ', str_replace( 'data-', '', $matches[1] ) );
 				$args = array( 'force-string' => true );
 				foreach ( $options as $key => $value ) {
 					if ( empty( $value ) ) {
@@ -983,6 +982,7 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 			$image_id = ( ! empty( $image['id'] ) ? $image['id'] : '' );
 		}
 		$image_src = ( ! empty( $image['url'] ) ? $image['url'] : '' );
+		$image_alt = ( ! empty( $image['alt'] ) ? $image['alt'] : get_post_meta( $image_id, '_wp_attachment_image_alt', true ) );
 		$image_full = ( ! empty( $image['fullUrl'] ) ? $image['fullUrl'] : $image['url'] );
 		$image_contain_classes = array( 'kb-gallery-image-contain kadence-blocks-gallery-intrinsic' );
 		if ( ! empty( $image_ratio ) ) {
@@ -993,7 +993,7 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 			$image_contain_classes[] = 'kb-has-image-ratio-' . $image_ratio;
 		}
 		$padding_bottom = '';
-		$img = '<div class="' . esc_attr( implode( ' ', $image_contain_classes ) ) . '" ' . ( ! empty( $padding_bottom ) ? 'style="padding-bottom:' . $padding_bottom . '%;"' : '' ) . '><img src="' . esc_attr( $image_src ) . '" ' . ( ! empty( $image['width'] ) ? 'width="' . $image['width'] . '"' : '' ) . ' ' . ( ! empty( $image['height'] ) ? 'height="' . $image['height'] . '"' : '' ) . ' alt="' . esc_attr( $image['alt'] ) . '" data-full-image="' . esc_attr( $image_full ) . '" data-light-image="' . esc_attr( $image_full ) . '" data-id="' . esc_attr( $image_id ) . '" class="wp-image-' . esc_attr( $image_id ) . '"/></div>';
+		$img = '<div class="' . esc_attr( implode( ' ', $image_contain_classes ) ) . '" ' . ( ! empty( $padding_bottom ) ? 'style="padding-bottom:' . $padding_bottom . '%;"' : '' ) . '><img src="' . esc_attr( $image_src ) . '" ' . ( ! empty( $image['width'] ) ? 'width="' . $image['width'] . '"' : '' ) . ' ' . ( ! empty( $image['height'] ) ? 'height="' . $image['height'] . '"' : '' ) . ' alt="' . esc_attr( $image_alt ) . '" data-full-image="' . esc_attr( $image_full ) . '" data-light-image="' . esc_attr( $image_full ) . '" data-id="' . esc_attr( $image_id ) . '" class="wp-image-' . esc_attr( $image_id ) . '"/></div>';
 		$output = '<div class="kadence-blocks-gallery-thumb-item">';
 		$output .= '<div class="kadence-blocks-gallery-thumb-item-inner">';
 		$output .= '<figure class="' . esc_attr( implode( ' ', $fig_classes ) ) . '">';
@@ -1023,8 +1023,9 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 		if ( empty( $image_id ) ) {
 			$image_id = ( ! empty( $image['id'] ) ? $image['id'] : '' );
 		}
-		$image_src = ( ! empty( $image['url'] ) ? $image['url'] : '' );
+		$image_src  = ( ! empty( $image['url'] ) ? $image['url'] : '' );
 		$image_full = ( ! empty( $image['fullUrl'] ) ? $image['fullUrl'] : $image['url'] );
+		$image_alt  = ( ! empty( $image['alt'] ) ? $image['alt'] : get_post_meta( $image_id, '_wp_attachment_image_alt', true ) );
 		switch ( $link_to ) {
 			case 'media':
 				$href = ( ! empty( $image_full ) ? $image_full : '' );
@@ -1093,7 +1094,7 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 		} else if ( ! empty( $image_ratio ) && 'inherit' === $image_ratio && 'grid' === $type && ! empty( $image['width'] ) && ! empty( $image['height'] ) ) {
 			$padding_bottom = floor( ( $image['height'] / $image['width'] ) * 100 );
 		}
-		$img = '<div class="' . esc_attr( implode( ' ', $image_contain_classes ) ) . '" ' . ( ! empty( $padding_bottom ) ? 'style="padding-bottom:' . $padding_bottom . '%;"' : '' ) . '><img src="' . esc_attr( $image_src ) . '" ' . ( ! empty( $image['width'] ) ? 'width="' . $image['width'] . '"' : '' ) . ' ' . ( ! empty( $image['height'] ) ? 'height="' . $image['height'] . '"' : '' ) . ' alt="' . esc_attr( $image['alt'] ) . '" data-full-image="' . esc_attr( $image_full ) . '" data-light-image="' . esc_attr( $image_full ) . '" data-id="' . esc_attr( $image_id ) . '" class="wp-image-' . esc_attr( $image_id ) . '"/></div>';
+		$img = '<div class="' . esc_attr( implode( ' ', $image_contain_classes ) ) . '" ' . ( ! empty( $padding_bottom ) ? 'style="padding-bottom:' . $padding_bottom . '%;"' : '' ) . '><img src="' . esc_attr( $image_src ) . '" ' . ( ! empty( $image['width'] ) ? 'width="' . $image['width'] . '"' : '' ) . ' ' . ( ! empty( $image['height'] ) ? 'height="' . $image['height'] . '"' : '' ) . ' alt="' . esc_attr( $image_alt ) . '" data-full-image="' . esc_attr( $image_full ) . '" data-light-image="' . esc_attr( $image_full ) . '" data-id="' . esc_attr( $image_id ) . '" class="wp-image-' . esc_attr( $image_id ) . '"/></div>';
 		$output = '<' . $item_tag . ' class="kadence-blocks-gallery-item">';
 		$output .= '<div class="kadence-blocks-gallery-item-inner">';
 		$output .= '<figure class="' . esc_attr( implode( ' ', $fig_classes ) ) . '">';
@@ -1134,7 +1135,6 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 				'listFields' => $this->get_list_fields(),
 				'htmlFields' => $this->get_html_fields(),
 				'conditionalFields' => $this->get_conditional_fields(),
-				'conditionalTaxonomies' => $this->get_conditional_taxonomies(),
 				'imageSizes' => $this->get_image_sizes(),
 				'dynamicRenderEndpoint' => '/kbp-dynamic/v1/render',
 				'dynamicLinkLabelEndpoint' => '/kbp-dynamic/v1/link_label',
@@ -1317,6 +1317,10 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 						'value' => self::SITE_GROUP . '|user_info',
 						'label' => esc_attr__( 'Current User Display Name', 'kadence-blocks-pro' ),
 					),
+					array(
+						'value' => self::SITE_GROUP . '|custom_setting',
+						'label' => esc_attr__( 'Site Custom Setting', 'kadence-blocks-pro' ),
+					),
 				),
 			),
 			array(
@@ -1491,6 +1495,14 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 					array(
 						'value' => self::SITE_GROUP . '|page_title',
 						'label' => esc_attr__( 'Page Title', 'kadence-blocks-pro' ),
+					),
+					array(
+						'value' => self::SITE_GROUP . '|user_info',
+						'label' => esc_attr__( 'Current User Display Name', 'kadence-blocks-pro' ),
+					),
+					array(
+						'value' => self::SITE_GROUP . '|custom_setting',
+						'label' => esc_attr__( 'Site Custom Setting', 'kadence-blocks-pro' ),
 					),
 				),
 			),
@@ -1694,6 +1706,10 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 						'value' => self::SITE_GROUP . '|site_url',
 						'label' => esc_attr__( 'Site URL', 'kadence-blocks-pro' ),
 					),
+					array(
+						'value' => self::SITE_GROUP . '|custom_setting',
+						'label' => esc_attr__( 'Site Custom Setting', 'kadence-blocks-pro' ),
+					),
 				),
 			),
 			array(
@@ -1719,6 +1735,10 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 					array(
 						'value' => self::AUTHOR_GROUP . '|author_url',
 						'label' => esc_attr__( 'Author Archive URL', 'kadence-blocks-pro' ),
+					),
+					array(
+						'value' => self::AUTHOR_GROUP . '|author_custom_field',
+						'label' => esc_attr__( 'Author Custom Field', 'kadence-blocks-pro' ),
 					),
 				),
 			),
@@ -1823,6 +1843,10 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 						'value' => self::SITE_GROUP . '|logo_url',
 						'label' => esc_attr__( 'Logo Image URL', 'kadence-blocks-pro' ),
 					),
+					array(
+						'value' => self::SITE_GROUP . '|custom_setting',
+						'label' => esc_attr__( 'Site Custom Setting', 'kadence-blocks-pro' ),
+					),
 				),
 			),
 			array(
@@ -1890,6 +1914,15 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 				),
 			),
 			array(
+				'label' => __( 'Site', 'kadence-blocks-pro' ),
+				'options' => array(
+					array(
+						'value' => self::SITE_GROUP . '|custom_setting',
+						'label' => esc_attr__( 'Site Custom Setting', 'kadence-blocks-pro' ),
+					),
+				),
+			),
+			array(
 				'label' => __( 'Meta Relationship', 'kadence-blocks-pro' ),
 				'options' => array(
 					array(
@@ -1921,6 +1954,15 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 					array(
 						'value' => self::ARCHIVE_GROUP . '|archive_custom_field',
 						'label' => esc_attr__( 'Archive Custom Field', 'kadence-blocks-pro' ),
+					),
+				),
+			),
+			array(
+				'label' => __( 'Site', 'kadence-blocks-pro' ),
+				'options' => array(
+					array(
+						'value' => self::SITE_GROUP . '|custom_setting',
+						'label' => esc_attr__( 'Site Custom Setting', 'kadence-blocks-pro' ),
 					),
 				),
 			),
@@ -1969,6 +2011,10 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 					array(
 						'value' => self::SITE_GROUP . '|logo',
 						'label' => esc_attr__( 'Logo Image', 'kadence-blocks-pro' ),
+					),
+					array(
+						'value' => self::SITE_GROUP . '|custom_setting',
+						'label' => esc_attr__( 'Site Custom Setting', 'kadence-blocks-pro' ),
 					),
 				),
 			),
@@ -2140,13 +2186,17 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 							case 'mb_option':
 								$new_source = kbp_dynamic_content_metabox( $actual_key, $meta_type, 'relationship', $post->ID, $args );
 								break;
+							case 'pod_meta':
+							case 'pod_option':
+								$new_source = kbp_dynamic_content_pods( $actual_key, $meta_type, 'relationship', $post->ID, $args );
+								break;
 							case 'acf_meta':
 							case 'acf_option':
 								$new_source = kbp_dynamic_content_acf( $actual_key, $meta_type, 'relationship', $post->ID, $args );
 								break;
 						}
 					} else {
-						$new_source = get_post_meta( $post->ID, $para, true );
+						$new_source = get_post_meta( $post->ID, $relcustom, true );
 					}
 					if ( ! empty( absint( $new_source ) ) ) {
 						$group   = self::POST_GROUP;
@@ -2168,7 +2218,7 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 				if ( ! $post ) {
 					$post = get_post( $item_id );
 				}
-				if ( $post && is_object( $post ) && ( 'inherit' === $post->post_status || 'publish' === $post->post_status ) && apply_filters( 'kadence_dynamic_enable_password_content', empty( $post->post_password ) ) ) {
+				if ( $post && is_object( $post ) && ( ( function_exists( 'is_post_publicly_viewable' ) ? is_post_publicly_viewable( $post ) : 'inherit' === $post->post_status || 'publish' === $post->post_status ) || current_user_can( 'read_post', $post->ID ) ) && apply_filters( 'kadence_dynamic_enable_password_content', empty( $post->post_password ) ) ) {
 					switch ( $field ) {
 						case 'post_title':
 							$output = wp_kses_post( get_the_title( $post ) );
@@ -2228,6 +2278,10 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 										case 'mb_option':
 											$output = kbp_dynamic_content_metabox( $actual_key, $meta_type, $type, $post->ID, $args );
 											break;
+										case 'pod_meta':
+										case 'pod_option':
+											$output = kbp_dynamic_content_pods( $actual_key, $meta_type, $type, $post->ID, $args );
+											break;
 										case 'acf_meta':
 										case 'acf_option':
 											$output = kbp_dynamic_content_acf( $actual_key, $meta_type, $type, $post->ID, $args );
@@ -2261,11 +2315,11 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 							}
 							break;
 						default:
-							$output = apply_filters( "kadence_dynamic_content_core_post_{$field}_render", '', $item_id, $origin, $group, $field, $para, $custom );
+							$output = apply_filters( "kadence_dynamic_content_core_post_{$field}_render", '', $item_id, $origin, $group, $field, $para, $custom, $relate, $relcustom );
 							break;
 					}
 				} else {
-					$output = apply_filters( "kadence_dynamic_content_core_post_{$field}_render", '', $item_id, $origin, $group, $field, $para, $custom );
+					$output = apply_filters( "kadence_dynamic_content_core_post_{$field}_render", '', $item_id, $origin, $group, $field, $para, $custom, $relate, $relcustom );
 				}
 			} elseif ( self::AUTHOR_GROUP === $group ) {
 				if ( 'current' === $item_id || '' === $item_id ) {
@@ -2347,6 +2401,9 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 											case 'mb_meta':
 												$output = kbp_dynamic_content_metabox( $actual_key, $meta_type, $type, $author_id, $args );
 												break;
+											case 'pod_meta':
+												$output = kbp_dynamic_content_pods( $actual_key, $meta_type, $type, $author_id, $args );
+												break;
 											case 'acf_meta':
 												$output = kbp_dynamic_content_acf( $actual_key, $meta_type, $type, 'user_' . $author_id, $args );
 												break;
@@ -2357,14 +2414,14 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 								}
 								break;
 							default:
-								$output = apply_filters( "kadence_dynamic_content_core_author_{$field}_render", '', $item_id, $origin, $group, $field, $para, $custom );
+								$output = apply_filters( "kadence_dynamic_content_core_author_{$field}_render", '', $item_id, $origin, $group, $field, $para, $custom, $relate, $relcustom );
 								break;
 						}
 					} else {
-						$output = apply_filters( "kadence_dynamic_content_core_author_{$field}_render", '', $item_id, $origin, $group, $field, $para, $custom );
+						$output = apply_filters( "kadence_dynamic_content_core_author_{$field}_render", '', $item_id, $origin, $group, $field, $para, $custom, $relate, $relcustom );
 					}
 				} else {
-					$output = apply_filters( "kadence_dynamic_content_core_author_{$field}_render", '', $item_id, $origin, $group, $field, $para, $custom );
+					$output = apply_filters( "kadence_dynamic_content_core_author_{$field}_render", '', $item_id, $origin, $group, $field, $para, $custom, $relate, $relcustom );
 				}
 			} elseif ( self::ARCHIVE_GROUP === $group ) {
 				if ( 'current' === $item_id || '' === $item_id ) {
@@ -2398,6 +2455,9 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 									case 'mb_meta':
 										$output = kbp_dynamic_content_metabox( $actual_key, $meta_type, $type, 'term:' . $item_id, $args );
 										break;
+									case 'pod_meta':
+										$output = kbp_dynamic_content_pods( $actual_key, $meta_type, $type, 'term:' . $item_id, $args );
+										break;
 									case 'acf_meta':
 										$term = get_queried_object();
 										if ( is_object( $term ) && isset( $term->taxonomy ) ) {
@@ -2411,7 +2471,7 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 						}
 						break;
 					default:
-						$output = apply_filters( "kadence_dynamic_content_core_archive_{$field}_render", '', $item_id, $origin, $group, $field, $para, $custom );
+						$output = apply_filters( "kadence_dynamic_content_core_archive_{$field}_render", '', $item_id, $origin, $group, $field, $para, $custom, $relate, $relcustom );
 						break;
 				}
 			} elseif ( self::SITE_GROUP === $group ) {
@@ -2443,6 +2503,29 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 						break;
 					case 'page_title':
 						$output = wp_kses_post( $this->get_the_title() );
+						break;
+					case 'custom_setting':
+						$output = '';
+						if ( ! empty( $para ) ) {
+							if ( 'kb_custom_input' === $para ) {
+								if ( ! empty( $custom ) ) {
+									$output = get_option( $custom );
+								}
+							} else if ( strpos( $para, '|' ) !== false ) {
+								list( $meta_type, $actual_key ) = explode( '|', $para );
+								switch ( $meta_type ) {
+									case 'mb_option':
+										$output = kbp_dynamic_content_metabox( $actual_key, $meta_type, $type, null, $args );
+										break;
+									case 'pod_option':
+										$output = kbp_dynamic_content_pods( $actual_key, $meta_type, $type, null, $args );
+										break;
+									case 'acf_option':
+										$output = kbp_dynamic_content_acf( $actual_key, $meta_type, $type, null, $args );
+										break;
+								}
+							}
+						}
 						break;
 					case 'user_info':
 						$user = wp_get_current_user();
@@ -2477,10 +2560,26 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 								$output = isset( $user->user_url ) ? $user->user_url : '';
 								break;
 							case 'meta':
-								if ( ! empty( $key ) ) {
-									$output = get_user_meta( $user->ID, $key, true );
-								} else {
-									$output = '';
+								if ( ! empty( $para ) ) {
+									if ( strpos( $para, '|' ) !== false ) {
+										list( $meta_type, $actual_key ) = explode( '|', $para );
+										switch ( $meta_type ) {
+											case 'mb_meta':
+												$output = kbp_dynamic_content_metabox( $actual_key, $meta_type, $type, $user->ID, $args );
+												break;
+											case 'pod_meta':
+												$output = kbp_dynamic_content_pods( $actual_key, $meta_type, $type, $user->ID, $args );
+												break;
+											case 'acf_meta':
+												$output = kbp_dynamic_content_acf( $actual_key, $meta_type, $type, 'user_' . $user->ID, $args );
+												break;
+											case 'kb_custom_input':
+												$output = get_user_meta( $user->ID, $actual_key, true );
+												break;
+										}
+									} else {
+										$output = get_user_meta( $user->ID, $para, true );
+									}
 								}
 								break;
 							default:
@@ -2490,7 +2589,7 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 						}
 						break;
 					default:
-						$output = apply_filters( "kadence_dynamic_content_core_site_{$field}_render", '', $item_id, $origin, $group, $field, $para, $custom );
+						$output = apply_filters( "kadence_dynamic_content_core_site_{$field}_render", '', $item_id, $origin, $group, $field, $para, $custom, $relate, $relcustom );
 						break;
 				}
 			} elseif ( self::MEDIA_GROUP === $group ) {
@@ -2558,6 +2657,9 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 											case 'mb_meta':
 												$output = kbp_dynamic_content_metabox( $actual_key, $meta_type, $type, $post->ID, $args );
 												break;
+											case 'pod_meta':
+												$output = kbp_dynamic_content_pods( $actual_key, $meta_type, $type, $post->ID, $args );
+												break;
 											case 'acf_meta':
 												$output = kbp_dynamic_content_acf( $actual_key, $meta_type, $type, $post->ID, $args );
 												break;
@@ -2568,7 +2670,7 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 								}
 								break;
 							default:
-								$output = apply_filters( "kadence_dynamic_content_core_media_{$field}_render", '', $item_id, $origin, $group, $field, $para, $custom );
+								$output = apply_filters( "kadence_dynamic_content_core_media_{$field}_render", '', $item_id, $origin, $group, $field, $para, $custom, $relate, $relcustom );
 								break;
 						}
 					}
@@ -2591,14 +2693,14 @@ class Kadence_Blocks_Pro_Dynamic_Content {
 						$output = get_comments_number( $post );
 						break;
 					default:
-						$output = apply_filters( "kadence_dynamic_content_core_comments_{$field}_render", '', $item_id, $origin, $group, $field, $para, $custom );
+						$output = apply_filters( "kadence_dynamic_content_core_comments_{$field}_render", '', $item_id, $origin, $group, $field, $para, $custom, $relate, $relcustom );
 						break;
 				}
 			}
 		} else {
-			$output = apply_filters( "kadence_dynamic_content_{$origin}_render", $item_id, $origin, $group, $field, $para, $custom );
+			$output = apply_filters( "kadence_dynamic_content_{$origin}_render", $item_id, $origin, $group, $field, $para, $custom, $relate, $relcustom );
 		}
-		return apply_filters( 'kadence_dynamic_content_render', $output, $item_id, $origin, $group, $field, $para, $custom );
+		return apply_filters( 'kadence_dynamic_content_render', $output, $item_id, $origin, $group, $field, $para, $custom, $relate, $relcustom );
 	}
 	/**
 	 * Get the title output.

@@ -3,7 +3,7 @@ Contributors: britner
 Tags: gutenberg, blocks, page builder, google fonts, dual buttons, svg icons, editor width,
 Requires at least: 5.9
 Tested up to: 6.0
-Stable tag: 1.7.12
+Stable tag: 1.7.18
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -19,9 +19,54 @@ Install the plugin into the `/wp-content/plugins/` folder, and activate it. This
 
 == Changelog ==
 
+== 1.7.18 | 21st October 2022 ==
+* Add: Option to show all custom fields in dynamic data selection.
+* Add: Option to search for active ActiveCampaign tags.
+* Update: Video Popup & Video Overlay to work in horizontal sections when a max width is applied.
+
+== 1.7.17 | 19th October 2022 ==
+* Fix: Possible Issue with Dynamic Gallery.
+
+== 1.7.16 | 18th October 2022 ==
+* Add: ActiveCampaign subscribe to form block.
+* Update: Custom icons to save sets as data and not files.
+* Update: Taxonomy Select for conditionals.
+* Update: Dynamic Content, custom field selection reload when source changes.
+* Update: Custom field rest call to use relationship as source.
+* Update: Modal button color selection.
+* Fix: Issue with dynamic gallery styles.
+* Fix: Issue with ACF archive custom meta.
+* Fix: Slider transition issue.
+* Fix: Extra min height control issue with slider.
+* Fix: Issue with dynamic gallery block and conditional display.
+* Fix: Issue with animate on scroll not working consistently after layout shift.
+* Fix: Language strings, missing in translation.
+
+== 1.7.15 | 29th August 2022 ==
+* Fix: Issue with missing selection when using custom field for dynamic link.
+
+== 1.7.14 | 24th August 2022 ==
+* Fix: Issue with post grid carousel not rendering in admin.
+
+== 1.7.13 | 23rd August 2022 ==
+* Add: Pods Framework support to dynamic content.
+* Update: Author custom fields in link settings.
+* Update: include kadence_blocks_pro_product_carousel_atts filter.
+* Update: Add option to show author image in meta for post carousel grid block.
+* Update: Improve css when selecting dynamic fields.
+* Fix: Issue with carousel when empty.
+* Fix: Issue with show more and loop templates.
+* Fix: Issue with dynamic content selector in split content.
+* Fix: Issue with thumbnail gallery slider showing navigation dots.
+* Fix: Issue with image overlay block and loop templates.
+* Fix: Issue with dynamic html block and relationship content.
+* Fix: Translations not working.
+* Fix: Issue with fallback text in dynamic content.
+* Fix: Issue with animate on scroll and some elements.
+
 == 1.7.12 | 1st June 2022 ==
 * Fix: Link style in dynamic list block.
-* Fix: Autoplay speed.
+* Fix: Product carousel Autoplay speed.
 
 == 1.7.11 | 31st May 2022 ==
 * Add: Add option for auto scroll carousel.

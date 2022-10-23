@@ -14,7 +14,7 @@ Theme_Customizer::add_settings(
 		'footer_dark_mode_align' => array(
 			'control_type' => 'kadence_radio_icon_control',
 			'section'      => 'footer_dark_mode',
-			'label'        => esc_html__( 'Content Align', 'kadence' ),
+			'label'        => esc_html__( 'Content Align', 'kadence-pro' ),
 			'priority'     => 10,
 			'default'      => kadence()->default( 'footer_dark_mode_align' ),
 			'live_method'     => array(
@@ -32,15 +32,15 @@ Theme_Customizer::add_settings(
 			'input_attrs'  => array(
 				'layout' => array(
 					'left'   => array(
-						'tooltip'  => __( 'Left Align', 'kadence' ),
+						'tooltip'  => __( 'Left Align', 'kadence-pro' ),
 						'dashicon' => 'editor-alignleft',
 					),
 					'center' => array(
-						'tooltip'  => __( 'Center Align', 'kadence' ),
+						'tooltip'  => __( 'Center Align', 'kadence-pro' ),
 						'dashicon' => 'editor-aligncenter',
 					),
 					'right'  => array(
-						'tooltip'  => __( 'Right Align', 'kadence' ),
+						'tooltip'  => __( 'Right Align', 'kadence-pro' ),
 						'dashicon' => 'editor-alignright',
 					),
 				),
@@ -50,7 +50,7 @@ Theme_Customizer::add_settings(
 		'footer_dark_mode_vertical_align' => array(
 			'control_type' => 'kadence_radio_icon_control',
 			'section'      => 'footer_dark_mode',
-			'label'        => esc_html__( 'Content Vertical Align', 'kadence' ),
+			'label'        => esc_html__( 'Content Vertical Align', 'kadence-pro' ),
 			'priority'     => 10,
 			'default'      => kadence()->default( 'footer_dark_mode_vertical_align' ),
 			'live_method'  => array(
@@ -68,15 +68,15 @@ Theme_Customizer::add_settings(
 			'input_attrs'  => array(
 				'layout' => array(
 					'top' => array(
-						'tooltip' => __( 'Top Align', 'kadence' ),
+						'tooltip' => __( 'Top Align', 'kadence-pro' ),
 						'icon'    => 'aligntop',
 					),
 					'middle' => array(
-						'tooltip' => __( 'Middle Align', 'kadence' ),
+						'tooltip' => __( 'Middle Align', 'kadence-pro' ),
 						'icon'    => 'alignmiddle',
 					),
 					'bottom' => array(
-						'tooltip' => __( 'Bottom Align', 'kadence' ),
+						'tooltip' => __( 'Bottom Align', 'kadence-pro' ),
 						'icon'    => 'alignbottom',
 					),
 				),
@@ -356,7 +356,7 @@ Theme_Customizer::add_settings(
 			'section'      => 'footer_dark_mode',
 			'priority'     => 20,
 			'default'      => kadence()->default( 'footer_dark_mode_switch_margin' ),
-			'label'        => esc_html__( 'Margin', 'kadence' ),
+			'label'        => esc_html__( 'Margin', 'kadence-pro' ),
 			'live_method'     => array(
 				array(
 					'type'     => 'css',

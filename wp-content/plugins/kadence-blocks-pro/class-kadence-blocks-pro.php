@@ -113,7 +113,7 @@ final class Kadence_Blocks_Pro {
 	private function setup_constants() {
 
 		if ( ! defined( 'KBP_VERSION' ) ) {
-			define( 'KBP_VERSION', '1.7.12' );
+			define( 'KBP_VERSION', '1.7.18' );
 		}
 
 		if ( ! defined( 'KBP_PLUGIN_FILE' ) ) {
@@ -161,6 +161,7 @@ final class Kadence_Blocks_Pro {
 	 */
 	public function include_files() {
 		require_once KBP_PATH . 'includes/kbp-installer.php';
+		require_once KBP_PATH . 'includes/kbp-active-campaign-controller.php';
 
 		require_once KBP_PATH . 'dist/form/admin/berlindb/base.php';
 		require_once KBP_PATH . 'dist/form/admin/berlindb/table.php';
@@ -190,6 +191,7 @@ final class Kadence_Blocks_Pro {
 		// Dynamic Content.
 		require_once KBP_PATH . 'dist/dynamic-content/inc/metabox.php';
 		require_once KBP_PATH . 'dist/dynamic-content/inc/acf.php';
+		require_once KBP_PATH . 'dist/dynamic-content/inc/pods.php';
 		require_once KBP_PATH . 'dist/dynamic-content/inc/image-format.php';
 		require_once KBP_PATH . 'dist/dynamic-content/inc/gallery-format.php';
 		require_once KBP_PATH . 'dist/dynamic-content/inc/background-format.php';
@@ -199,6 +201,7 @@ final class Kadence_Blocks_Pro {
 		require_once KBP_PATH . 'dist/class-kadence-blocks-post-select-controller.php';
 		require_once KBP_PATH . 'dist/dynamicblocks/form-mailchimp-rest-api.php';
 		require_once KBP_PATH . 'dist/dynamicblocks/form-sendinblue-rest-api.php';
+		require_once KBP_PATH . 'dist/dynamicblocks/form-activecampaign-rest-api.php';
 		require_once KBP_PATH . 'dist/init.php';
 		require_once KBP_PATH . 'dist/dynamicblocks/class-kadence-blocks-pro-post-grid.php';
 		require_once KBP_PATH . 'dist/dynamicblocks/class-kadence-blocks-pro-dynamic-html-block.php';

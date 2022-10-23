@@ -48,6 +48,11 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 	/**
 	 * Query property name.
 	 */
+	const PROP_IGNORE_SOURCE = 'ignore_source';
+
+	/**
+	 * Query property name.
+	 */
 	const PROP_BEFORE = 'before';
 
 	/**
@@ -64,6 +69,16 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 	 * Type property name.
 	 */
 	const PROP_CURRENT = 'current';
+
+	/**
+	 * Per page property name.
+	 */
+	const PROP_PER_PAGE = 'per_page';
+
+	/**
+	 * Page property name.
+	 */
+	const PROP_PAGE = 'page';
 
 	/**
 	 * Query property name.
@@ -298,6 +313,9 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 		}
 		$dynamic_class = Kadence_Blocks_Pro_Dynamic_Content::get_instance();
 		$response      = $dynamic_class->get_content( $args );
+		if ( empty( $response ) ) {
+			return rest_ensure_response( esc_html__( 'No Content', 'kadence-blocks-pro' ) );
+		}
 		return rest_ensure_response( $response );
 	}
 	/**
@@ -357,6 +375,9 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 		if ( is_array( $response ) ) {
 			$response = $response[0];
 		}
+		if ( empty( $response ) ) {
+			return '';
+		}
 		return rest_ensure_response( $response );
 	}
 	/**
@@ -413,6 +434,9 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 		}
 		$dynamic_class = Kadence_Blocks_Pro_Dynamic_Content::get_instance();
 		$response      = $dynamic_class->get_content( $args );
+		if ( empty( $response ) ) {
+			return '';
+		}
 		return rest_ensure_response( $response );
 	}
 	/**
@@ -469,6 +493,9 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 		}
 		$dynamic_class = Kadence_Blocks_Pro_Dynamic_Content::get_instance();
 		$response      = $dynamic_class->get_content( $args );
+		if ( empty( $response ) ) {
+			return '';
+		}
 		return rest_ensure_response( $response );
 	}
 	/**
@@ -603,6 +630,9 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 		}
 		$dynamic_class = Kadence_Blocks_Pro_Dynamic_Content::get_instance();
 		$response      = $dynamic_class->get_content( $args );
+		if ( empty( $response ) ) {
+			return '';
+		}
 		return rest_ensure_response( $response );
 	}
 	/**
@@ -711,7 +741,11 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 								case 'acf_meta':
 									if ( function_exists( 'get_field_object' ) ) {
 										$field_object = get_field_object( $actual_key, $source );
-										$output = $field_object['label'] . $output;
+										if ( isset( $field_object['label'] ) ) {
+											$output = $field_object['label'] . $output;
+										} else {
+											$output = $output;
+										}
 									}
 									break;
 							}
@@ -769,6 +803,33 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 			switch ( $field ) {
 				case 'site_url':
 					$output = __( 'Site URL', 'kadence-blocks-pro' );
+					break;
+				case 'custom_setting':
+					if ( ! empty( $para ) ) {
+						if ( 'kb_custom_input' === $para ) {
+							if ( ! empty( $custom ) ) {
+								$output = $custom . $output;
+							}
+						} else if ( strpos( $para, '|' ) !== false ) {
+							list( $meta_type, $actual_key ) = explode( '|', $para );
+							switch ( $meta_type ) {
+								case 'mb_option':
+									$output = $actual_key . $output;
+									break;
+								case 'pod_option':
+									$output = $actual_key . $output;
+									break;
+								case 'acf_option':
+									if ( function_exists( 'get_field_object' ) ) {
+										$field_object = get_field_object( $actual_key, $source );
+										$output = $field_object['label'] . $output;
+									}
+									break;
+							}
+						} else {
+							$output = $para . $output;
+						}
+					}
 					break;
 				case 'user_info':
 					$output = __( 'User Info', 'kadence-blocks-pro' );
@@ -845,6 +906,11 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 			'type'        => 'boolean',
 			'default'     => false,
 		);
+		$query_params[ self::PROP_IGNORE_SOURCE ] = array(
+			'description' => __( 'Fetch all fields', 'kadence-blocks-pro' ),
+			'type'        => 'boolean',
+			'default'     => false,
+		);
 		$query_params[ self::PROP_BEFORE ] = array(
 			'description' => __( 'Text Before Item.', 'kadence-blocks-pro' ),
 			'type'        => 'string',
@@ -869,6 +935,18 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 			'description' => __( 'The custom field Key.', 'kadence-blocks-pro' ),
 			'type'        => 'string',
 		);
+		$query_params[ self::PROP_PER_PAGE ] = array(
+			'description' => __( 'Number of results to return.', 'kadence-blocks-pro' ),
+			'type'        => 'number',
+			'sanitize_callback' => array( $this, 'sanitize_post_perpage' ),
+			'default' => 25,
+		);
+		$query_params[ self::PROP_PAGE ] = array(
+			'description' => __( 'Page of results to return.', 'kadence-blocks-pro' ),
+			'type'        => 'number',
+			'sanitize_callback' => array( $this, 'sanitize_results_page_number' ),
+			'default' => 1,
+		);
 		return $query_params;
 	}
 	/**
@@ -879,15 +957,8 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 	 */
 	public function get_custom_fields( $request ) {
 		$source        = $request->get_param( self::PROP_SOURCE );
-		$group         = $request->get_param( self::PROP_GROUP );
-		$origin        = $request->get_param( self::PROP_ORIGIN );
+		$ignore_source = $request->get_param( self::PROP_IGNORE_SOURCE );
 		$field         = $request->get_param( self::PROP_FIELD );
-		$custom        = $request->get_param( self::PROP_CUSTOM );
-		$para          = $request->get_param( self::PROP_PARA );
-		$force_string  = $request->get_param( self::PROP_FORCE_STRING );
-		$before        = $request->get_param( self::PROP_BEFORE );
-		$after         = $request->get_param( self::PROP_AFTER );
-		$fallback      = $request->get_param( self::PROP_FALLBACK );
 		$type          = $request->get_param( self::PROP_TYPE );
 		$relate        = $request->get_param( self::PROP_RELATE );
 		$relcustom     = $request->get_param( self::PROP_RELCUSTOM );
@@ -901,18 +972,26 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 				'image',
 				// Meta box types.
 				'single_image',
+				'image_advanced',
+				// Pods.
+				'file',
 			);
 		} elseif ( 'background' === $type ) {
 			$types = array(
 				'image',
 				// Meta box types.
 				'single_image',
+				'image_advanced',
+				// Pods.
+				'file',
 			);
 		} elseif ( 'gallery' === $type ) {
 			$types = array(
 				'gallery',
 				// Meta box types.
 				'image_advanced',
+				// Pods.
+				'file',
 			);
 		} elseif ( 'list' === $type ) {
 			$types = array(
@@ -933,6 +1012,8 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 				// ACF types.
 				'relationship',
 				'post_object',
+				// Pod types.
+				'pick',
 			);
 		} elseif ( 'html' === $type ) {
 			$types = array(
@@ -942,10 +1023,12 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 				'range',
 				'email',
 				'url',
+				'website',
 				'password',
 				'wysiwyg',
 				'oembed',
 				'select',
+				'date',
 				'date_picker',
 				'time_picker',
 				'date_time_picker',
@@ -959,6 +1042,11 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 				'page_link',
 				'url',
 				'link',
+				'website',
+				// Meta.
+				'file_upload',
+				'file_advanced',
+				'file_input',
 			);
 		} else {
 			$types = array(
@@ -968,6 +1056,7 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 				'range',
 				'email',
 				'url',
+				'website',
 				'password',
 				'wysiwyg',
 				'select',
@@ -985,10 +1074,187 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 		}
 		$options = array();
 		$already_captured = array();
+		if ( ( 'post' === $meta_group || 'relationship' === $meta_group ) ) {
+			if ( $source ) {
+				$item_id = $source;
+			} else {
+				$item_id = get_the_ID();
+			}
+			$post = get_post( $item_id );
+		}
+		if ( 'relationship' === $meta_group && ! empty( $relate ) ) {
+			$new_source = '';
+			if ( 'kb_custom_input' === $relate ) {
+				if ( ! empty( $relcustom ) ) {
+					$output = get_post_meta( $item_id, $relcustom, true );
+				}
+			} else if ( strpos( $relate, '|' ) !== false ) {
+				list( $meta_type, $actual_key ) = explode( '|', $relate );
+				switch ( $meta_type ) {
+					case 'mb_meta':
+					case 'mb_option':
+						$new_source = kbp_dynamic_content_metabox( $actual_key, $meta_type, 'relationship', $item_id, array() );
+						break;
+					case 'pod_meta':
+					case 'pod_option':
+						$new_source = kbp_dynamic_content_pods( $actual_key, $meta_type, 'relationship', $item_id, array() );
+						break;
+					case 'acf_meta':
+					case 'acf_option':
+						$new_source = kbp_dynamic_content_acf( $actual_key, $meta_type, 'relationship', $item_id, array() );
+						break;
+				}
+			} else {
+				$new_source = get_post_meta( $item_id, $relcustom, true );
+			}
+			if ( ! empty( absint( $new_source ) ) ) {
+				$item_id = absint( $new_source );
+			}
+		}
+		// Get Pods.
+		if ( function_exists( 'pods' ) ) {
+			if ( ( 'post' === $meta_group || 'relationship' === $meta_group ) ) {
+				if ( $ignore_source ) {
+					$pod_posts = get_posts( array('post_type' => '_pods_pod', 'numberposts' => 100 ) );
+					if ( ! empty( $pod_posts ) && is_array( $pod_posts ) ) {
+						foreach ( $pod_posts as $pod_post ) {
+							$pod = pods( $pod_post->post_name, $pod_post->ID, true );
+							if ( $pod ) {
+								$pod_type = $pod->pod_data->__get( 'type' );
+								$send_back_group  = false;
+								if ( ( 'post' === $meta_group || 'relationship' === $meta_group ) && ( 'post_type' === $pod_type || 'cpt' === $pod_type ) ) {
+									$pod_groups = $pod->pod_data->get_groups();
+									if ( ! empty( $pod_groups ) && is_array( $pod_groups ) ) {
+										foreach ( $pod_groups as $pod_group ) {
+											$pod_options = array();
+											$fields = $pod_group->get_fields();
+											foreach ( $pod_group->get_fields() as $field ) {
+												if ( empty( $field->__get( 'name' ) ) ) {
+													continue;
+												}
+												$already_captured[] = $field->__get( 'name' );
+												if ( ! in_array( $field->__get('type'), $types, true ) ) {
+													continue;
+												}
+												$field_key = 'pod_meta|' . $field->__get( 'name' );
+												$pod_options[] = array(
+													'value' => $field_key,
+													'label' => ( $field->__get( 'label' ) ? $field->__get( 'label' ) : $field_key ),
+												);
+											}
+											if ( ! empty( $pod_options ) ) {
+												$options[] = array(
+													'label'   => ( ! empty( $pod_group->__get( 'label' ) ) ? $pod_group->__get( 'label' ) : __( 'Pods Group', 'kadence-blocks-pro' ) ),
+													'options' => $pod_options,
+												);
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				} else {
+					$source_type = get_post_type( $item_id );
+					$pod = pods_api()->load_pod( array( 'name' => $source_type ) );
+					if ( $pod ) {
+						$pod_groups = $pod->get_groups();
+						if ( ! empty( $pod_groups ) && is_array( $pod_groups ) ) {
+							foreach ( $pod_groups as $pod_group ) {
+								$pod_options = array();
+								$fields = $pod_group->get_fields();
+								foreach ( $pod_group->get_fields() as $field ) {
+									if ( empty( $field->__get( 'name' ) ) ) {
+										continue;
+									}
+									$already_captured[] = $field->__get( 'name' );
+									if ( ! in_array( $field->__get('type'), $types, true ) ) {
+										continue;
+									}
+									$field_key = 'pod_meta|' . $field->__get( 'name' );
+									$pod_options[] = array(
+										'value' => $field_key,
+										'label' => ( $field->__get( 'label' ) ? $field->__get( 'label' ) : $field_key ),
+									);
+								}
+								if ( ! empty( $pod_options ) ) {
+									$options[] = array(
+										'label'   => ( ! empty( $pod_group->__get( 'label' ) ) ? $pod_group->__get( 'label' ) : __( 'Pods Group', 'kadence-blocks-pro' ) ),
+										'options' => $pod_options,
+									);
+								}
+							}
+						}
+					}
+				}
+			} else {
+				$pod_posts = get_posts( array('post_type' => '_pods_pod', 'numberposts' => 100 ) );
+				if ( ! empty( $pod_posts ) && is_array( $pod_posts ) ) {
+					foreach ( $pod_posts as $pod_post ) {
+						$pod_object = pods( $pod_post->post_name, $pod_post->ID, true );
+						if ( $pod_object ) {
+							$pod_type = $pod_object->pod_data->__get( 'type' );
+							$send_back_group  = false;
+							$is_settings_page = false;
+							if ( 'archive' === $meta_group && ( 'taxonomy' === $pod_type || 'ct' === $pod_type ) ) {
+								$send_back_group = true;
+							} elseif ( 'author' === $meta_group && ( 'user' === $pod_type ) ) {
+								$send_back_group = true;
+							} elseif ( 'media' === $meta_group && 'media' === $pod_type ) {
+								$send_back_group = true;
+							} elseif ( 'user' === $meta_group && ( 'user' === $pod_type ) ) {
+								$send_back_group = true;
+							} elseif ( 'site' === $meta_group && ( 'settings' === $pod_type ) ) {
+								$send_back_group  = true;
+								$is_settings_page = true;
+							}
+							if ( ! $send_back_group ) {
+								continue;
+							}
+							$pod_groups = $pod_object->pod_data->get_groups();
+							if ( ! empty( $pod_groups ) && is_array( $pod_groups ) ) {
+								foreach ( $pod_groups as $pod_group ) {
+									$pod_options = array();
+									$fields = $pod_group->get_fields();
+									foreach ( $pod_group->get_fields() as $field ) {
+										if ( empty( $field->__get( 'name' ) ) ) {
+											continue;
+										}
+										$already_captured[] = $field->__get( 'name' );
+										if ( ! in_array( $field->__get('type'), $types, true ) ) {
+											continue;
+										}
+										if ( $is_settings_page ) {
+											$field_key = 'pod_option|' . $pod_object->pod_data->__get( 'name' ) . ':' . $field->__get( 'name' );
+											$pod_options[] = array(
+												'value' => $field_key,
+												'label' => ( $field->__get( 'label' ) ? $field->__get( 'label' ) : $field_key ),
+											);
+										} else {
+											$field_key = 'pod_meta|' . $field->__get( 'name' );
+											$pod_options[] = array(
+												'value' => $field_key,
+												'label' => ( $field->__get( 'label' ) ? $field->__get( 'label' ) : $field_key ),
+											);
+										}
+									}
+									if ( ! empty( $pod_options ) ) {
+										$options[] = array(
+											'label'   => ( ! empty( $pod_group->__get( 'label' ) ) ? $pod_group->__get( 'label' ) : __( 'Pods Group', 'kadence-blocks-pro' ) ),
+											'options' => $pod_options,
+										);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 		// Get Meta Box.
 		if ( function_exists( 'rwmb_get_registry' ) ) {
 			$meta_box_registry = rwmb_get_registry( 'meta_box' );
-			if ( 'post' === $meta_group || 'relationship' === $meta_group ) {
+			if ( 'site' === $meta_group ) {
 				$setting_meta_box = rwmb_get_registry( 'field' )->get_by_object_type( 'setting' );
 				if ( ! empty( $setting_meta_box ) && is_array( $setting_meta_box ) ) {
 					foreach ( $setting_meta_box as $setting_ky => $setting_fields ) {
@@ -1073,7 +1339,11 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 		}
 		// GET ACF.
 		if ( class_exists( 'ACF' ) && function_exists( 'acf_get_field_groups' ) ) {
-			$acf_groups = acf_get_field_groups();
+			if ( ( 'post' === $meta_group || 'relationship' === $meta_group ) && ! $ignore_source ) {
+				$acf_groups = acf_get_field_groups( array( 'post_id' => $item_id ) );
+			} else {
+				$acf_groups = acf_get_field_groups();
+			}
 			$options_pages_group_ids = array();
 			// Make sure there are some groups.
 			if ( $acf_groups ) {
@@ -1115,6 +1385,27 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 							'current_user_role',
 							'user_form',
 							'user_role',
+						);
+						if ( isset( $acf_group['location'] ) && is_array( $acf_group['location'] ) ) {
+							foreach ( $acf_group['location'] as $sub_location_key => $sub_locations ) {
+								if ( isset( $sub_locations ) && is_array( $sub_locations ) ) {
+									foreach ( $sub_locations as $location_key => $location ) {
+										if ( isset( $location ) && is_array( $location ) ) {
+											if ( isset( $location['param'] ) && in_array( $location['param'], $only_these_fields, true ) ) {
+												$send_back_group = true;
+											}
+										}
+									}
+								}
+							}
+						}
+						if ( ! $send_back_group ) {
+							continue;
+						}
+					} elseif ( 'site' === $meta_group ) {
+						$send_back_group = false;
+						$only_these_fields = array(
+							'options_page',
 						);
 						if ( isset( $acf_group['location'] ) && is_array( $acf_group['location'] ) ) {
 							foreach ( $acf_group['location'] as $sub_location_key => $sub_locations ) {
@@ -1240,21 +1531,44 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 							'label' => ( $field['label'] ? $field['label'] : $field_key ),
 						);
 					}
-					$options[] = array(
-						'label'   => $acf_group['title'],
-						'options' => $acf_options,
-					);
+					if ( ! empty( $acf_options ) ) {
+						$options[] = array(
+							'label'   => $acf_group['title'],
+							'options' => $acf_options,
+						);
+					}
 				}
 			}
 		}
-
+		// Allow third parties to filter in.
+		$args = array(
+			'source' => $source,
+			'relate' => $relate,
+			'relcustom' => $relcustom,
+			'type' => $type,
+		);
+		$options = apply_filters( 'kadence_blocks_dynamic_custom_fields', $options, $meta_group, $already_captured, $args );
+		$already_captured = apply_filters( 'kadence_blocks_dynamic_custom_fields_captured', $already_captured );
 		// GET OTHER CUSTOM FIELDS.
 		if ( 'post' === $meta_group || 'relationship' === $meta_group ) {
-			$custom_keys = get_post_custom_keys( ( $source ? $source : null ) );
+			// Render Core.
+			if ( $ignore_source ) {
+				$custom_keys = get_post_custom_keys( $item_id );
+			} else {
+				$custom_keys = get_post_custom_keys();
+			}
 			if ( ! empty( $custom_keys ) ) {
 				$other_options = array();
+				$post_exclude_list = array(
+					// Kadence.
+					'kt_blocks_editor_width',
+					// Woocommerce.
+					'total_sales',
+					// Others.
+					'inline_featured_image',
+				);
 				foreach ( $custom_keys as $custom_key ) {
-					if ( '_' !== substr( $custom_key, 0, 1 ) && ! in_array( $custom_key, $already_captured, true ) && 'kt_blocks_editor_width' !== $custom_key ) {
+					if ( '_' !== substr( $custom_key, 0, 1 ) && ! in_array( $custom_key, $already_captured, true ) && ! in_array( $custom_key, $post_exclude_list, true ) ) {
 						$other_options[] = array(
 							'value' => $custom_key,
 							'label' => $custom_key,
@@ -1269,8 +1583,8 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 				}
 			}
 		} elseif ( 'author' === $meta_group || 'user' === $meta_group ) {
-			if ( $source ) {
-				$author_id   = get_post_field( 'post_author', $source );
+			if ( $item_id ) {
+				$author_id   = get_post_field( 'post_author', $item_id );
 				$custom_keys = get_user_meta( $author_id );
 				if ( ! empty( $custom_keys ) ) {
 					$other_options = array();
@@ -1332,7 +1646,6 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 				}
 			}
 		}
-
 		// Add Option to manually add key.
 		$options[] = array(
 			'label'   => __( 'Manual', 'kadence-blocks-pro' ),
@@ -1344,5 +1657,23 @@ class Kadence_Blocks_Dynamic_Content_Controller extends WP_REST_Controller {
 			),
 		);
 		return rest_ensure_response( $options );
+	}
+	/**
+	 * Sanitizes the page number, to ensure it's only a number.
+	 *
+	 * @param integer  $val number page page.
+	 * @return integer a number
+	 */
+	public function sanitize_results_page_number( $val ) {
+		return absint( $val );
+	}
+	/**
+	 * Sanitizes the perpage, to ensure it's only a number.
+	 *
+	 * @param integer  $val number page page.
+	 * @return integer a number
+	 */
+	public function sanitize_post_perpage( $val ) {
+		return min( absint( $val ), 100 );
 	}
 }

@@ -214,19 +214,25 @@ var MicroModal = function () {
 		var targetElement = document.querySelector('.kt-modal-overlay');
         switch (toggle) {
 		  case 'enable':
-			bodyScrollLock.enableBodyScroll(targetElement);
+			document.body.classList.remove( 'kadence-scrollbar-fixer' );
+			document.body.classList.remove( 'kt-modal-open' );
+			//bodyScrollLock.enableBodyScroll(targetElement);
             break;
 		  case 'disable':
-			bodyScrollLock.disableBodyScroll(targetElement, {
-				allowTouchMove: el => {
-					while (el && el !== document.body) {
-						if ( el.classList.contains('kt-modal-content') || el.classList.contains('kt-modal-container') ) {
-							return true
-						}
-						el = el.parentNode
-					}
-				}
-			});
+			var scrollBar = window.innerWidth - document.documentElement.clientWidth;
+			document.body.style.setProperty('--scrollbar-offset', scrollBar + 'px' );
+			document.body.classList.add( 'kadence-scrollbar-fixer' );
+			document.body.classList.add( 'kt-modal-open' );
+			// bodyScrollLock.disableBodyScroll(targetElement, {
+			// 	allowTouchMove: el => {
+			// 		while (el && el !== document.body) {
+			// 			if ( el.classList.contains('kt-modal-content') || el.classList.contains('kt-modal-container') ) {
+			// 				return true
+			// 			}
+			// 			el = el.parentNode
+			// 		}
+			// 	}
+			// });
             break;
           default:
         }
@@ -459,9 +465,8 @@ MicroModal.init({
 		var resizeEvent = window.document.createEvent('UIEvents');
 		resizeEvent.initUIEvent('resize', true, false, window, 0);
 		window.dispatchEvent(resizeEvent);
-		document.body.classList.add( 'kt-modal-open' )
 	},
-	onClose: modal => document.body.classList.remove( 'kt-modal-open' ),
+	onClose: modal => {},
 	openTrigger: 'data-modal-open',
 	closeTrigger: 'data-modal-close',
 	disableScroll: true,

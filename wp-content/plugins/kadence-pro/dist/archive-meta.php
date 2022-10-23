@@ -265,6 +265,8 @@ class Archive_Meta {
 						<label for="kwp-2-column"><?php esc_html_e( '2 Columns', 'kadence-pro' ); ?></label>
 						<input type="radio" id="kwp-3-column" name="kwp-tax-columns" value="3" <?php checked( '3' === $column ); ?>>
 						<label for="kwp-3-column"><?php esc_html_e( '3 Columns', 'kadence-pro' ); ?></label>
+						<input type="radio" id="kwp-3-column" name="kwp-tax-columns" value="4" <?php checked( '4' === $column ); ?>>
+						<label for="kwp-4-column"><?php esc_html_e( '4 Columns', 'kadence-pro' ); ?></label>
 					</div>
 				</td>
 			</tr>

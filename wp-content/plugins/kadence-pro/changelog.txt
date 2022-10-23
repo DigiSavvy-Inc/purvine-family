@@ -1,3 +1,18 @@
+== 1.0.7 | 23rd September 2022 ==
+* Fix: Possible issue of css styles in blocks breaking when using quick enable/disable.
+
+== 1.0.6 | 22nd September 2022 ==
+* Add: Element Duplicate button.
+* Add: Element quick disable.
+* Update: Event Calendar Hooks.
+* Fix: Issues with js translations not working.
+* Fix: Issue with custom padding of extra navigation areas.
+* Fix: Issue with showing elements on taxonomies.
+* Fix: Issue with possible notice in admin with shortpixel.
+* Fix: Issue with color switch losing "current".
+* Fix: Issue with custom archive settings missing 4 column option.
+* Fix: Issue with custom width mega menu missing on hover animations.
+
 == 1.0.5 | 4th March 2022 ==
 * Add: Menu Item description options.
 * Update: Mega menu controls for 5.9

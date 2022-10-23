@@ -91,7 +91,7 @@ class Dark_Mode {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		add_action( 'after_setup_theme', array( $this, 'load_actions' ), 20 );
 		add_filter( 'body_class', array( $this, 'add_body_class' ) );
-		add_filter( 'init', array( $this, 'filter_dark_mode_learn_dash' ) );
+		add_filter( 'template_redirect', array( $this, 'filter_dark_mode_learn_dash' ), 80 );
 		add_action( 'get_template_part_template-parts/header/dark-mode', array( $this, 'header_dark_mode_output' ), 10 );
 		add_action( 'get_template_part_template-parts/header/mobile-dark-mode', array( $this, 'mobile_dark_mode_output' ), 10 );
 		add_action( 'get_template_part_template-parts/footer/footer-dark-mode', array( $this, 'footer_dark_mode_output' ), 10 );

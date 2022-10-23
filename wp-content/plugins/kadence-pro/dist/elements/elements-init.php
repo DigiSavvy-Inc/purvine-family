@@ -161,6 +161,69 @@ class Elements_Post_Type_Controller {
 		// Add tabs for element "types". Here is where that happens.
 		add_filter( 'views_edit-' . self::SLUG, array( $this, 'admin_print_tabs' ) );
 		add_action( 'pre_get_posts', array( $this, 'admin_filter_results' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'action_enqueue_admin_scripts' ) );
+		add_action( 'wp_ajax_kadence_elements_change_status', array( $this, 'ajax_change_status' ) );
+		if ( class_exists( 'Kadence_Pro\Duplicate_Elements' ) ) {
+			new Duplicate_Elements( self::SLUG );
+		}
+	}
+	/**
+	 * Enqueues a script that adds sticky for single products
+	 */
+	public function action_enqueue_admin_scripts() {
+		$current_page = get_current_screen();
+		if ( 'edit-' . self::SLUG === $current_page->id ) {
+			// Enqueue the post styles.
+			wp_enqueue_style( 'kadence-elements-admin', KTP_URL . 'dist/elements/kadence-pro-element-post-admin.css', false, KTP_VERSION );
+			wp_enqueue_script( 'kadence_elements-admin', KTP_URL . 'dist/elements/kadence-pro-element-post-admin.min.js', array( 'jquery' ), KTP_VERSION, true );
+			wp_localize_script(
+				'kadence_elements-admin',
+				'kadence_elements_params',
+				array(
+					'ajax_url'   => admin_url( 'admin-ajax.php' ),
+					'ajax_nonce' => wp_create_nonce( 'kadence_elements-ajax-verification' ),
+					'draft' => esc_attr__( 'Draft', 'kadence-pro' ),
+					'publish' => esc_attr__( 'Published', 'kadence-pro' ),
+				)
+			);
+		}
+	}
+	/**
+	 * Ajax callback function.
+	 */
+	public function ajax_change_status() {
+		check_ajax_referer( 'kadence_elements-ajax-verification', 'security' );
+
+		if ( ! isset ( $_POST['post_id'] ) || ! isset( $_POST['post_status'] ) ) {
+			wp_send_json_error( __( 'Error: No post information was retrieved.', 'kadence-pro' ) );
+		}
+		$post_id = empty( $_POST['post_id'] ) ? '' : sanitize_text_field( wp_unslash( $_POST['post_id'] ) );
+		$post_status = empty( $_POST['post_status'] ) ? '' : sanitize_text_field( wp_unslash( $_POST['post_status'] ) );
+		$response = false;
+		if ( 'publish' === $post_status ) {
+			$response = $this->change_post_status( $post_id, 'draft' );
+		} else if ( 'draft' === $post_status ) {
+			$response = $this->change_post_status( $post_id, 'publish' );
+		}
+		if ( ! $response ) {
+			$error = new WP_Error( '001', 'Post Status invalid.' );
+			wp_send_json_error( $error );
+		}
+		wp_send_json_success();
+	}
+	/**
+	 * Change the post status
+	 * @param number $post_id - The ID of the post you'd like to change.
+	 * @param string $status -  The post status publish|pending|draft|private|static|object|attachment|inherit|future|trash.
+	 */
+	public function change_post_status( $post_id, $status ) {
+		if ( 'publish' === $status || 'draft' === $status ) {
+			$current_post = get_post( $post_id );
+			$current_post->post_status = $status;
+			return wp_update_post( $current_post );
+		} else {
+			return false;
+		}
 	}
 	/**
 	 * Filter the post results if tabs selected.
@@ -171,7 +234,7 @@ class Elements_Post_Type_Controller {
 		if ( ! ( is_admin() && $query->is_main_query() ) ) {
 			return $query;
 		}
-		if ( ! ( 'kadence_element' === $query->query['post_type'] && isset( $_REQUEST[ self::TYPE_SLUG ] ) ) ) {
+		if ( ! ( isset( $query->query['post_type'] ) && 'kadence_element' === $query->query['post_type'] && isset( $_REQUEST[ self::TYPE_SLUG ] ) ) ) {
 			return $query;
 		}
 		$screen = get_current_screen();
@@ -254,7 +317,7 @@ class Elements_Post_Type_Controller {
 	 */
 	public function init_classic_metabox() {
 		$path = KTP_URL . 'build/';
-		wp_enqueue_style( 'kadence-element-meta', $path . 'meta-controls.css', array( 'wp-components' ), KTP_VERSION );
+		wp_enqueue_style( 'kadence-element-meta', KTP_URL . 'dist/build/meta-controls.css', array( 'wp-components' ), KTP_VERSION );
 		wp_register_script(
 			'kadence-element-classic-meta',
 			$path . 'classic-meta.js',
@@ -269,7 +332,7 @@ class Elements_Post_Type_Controller {
 	public function add_metabox() {
 		add_meta_box(
 			'_kad_classic_meta_control',
-			__( 'Element Settings', 'kadence' ),
+			__( 'Element Settings', 'kadence-pro' ),
 			array( $this, 'render_classic_metabox' ),
 			array( self::SLUG ),
 			'side',
@@ -306,7 +369,7 @@ class Elements_Post_Type_Controller {
 			)
 		);
 		$path = KTP_URL . 'build/';
-		wp_enqueue_style( 'kadence-element-meta', $path . 'meta-controls.css', false, KTP_VERSION );
+		wp_enqueue_style( 'kadence-element-meta', KTP_URL . 'dist/build/meta-controls.css', false, KTP_VERSION );
 		wp_enqueue_script( 'kadence-element-classic-meta' );
 		// Add nonce for security and authentication.
 		wp_nonce_field( 'kadence_elements_classic_meta_nonce_action', 'kadence_elements_classic_meta_nonce' );
@@ -1434,7 +1497,7 @@ class Elements_Post_Type_Controller {
 	 */
 	public function output_element( $post, $meta, $shortcode = false ) {
 		$content = $post->post_content;
-		if ( ! $content ) {
+		if ( ! $content && ! class_exists( 'Elementor\Plugin' ) ) {
 			return;
 		}
 		if ( isset( $meta['device'] ) && ! empty( $meta['device'] ) && is_array( $meta['device'] ) ) {
@@ -1685,7 +1748,7 @@ class Elements_Post_Type_Controller {
 			} elseif ( is_archive() ) {
 				$queried_obj = get_queried_object();
 				$condition[] = 'general|archive';
-				if ( is_post_type_archive() && is_object( $queried_obj ) ) {
+				if ( is_post_type_archive() && is_object( $queried_obj ) && ! is_tax() ) {
 					$condition[] = 'post_type_archive|' . $queried_obj->name;
 				} elseif ( is_tax() || is_category() || is_tag() ) {
 					if ( is_object( $queried_obj ) ) {
@@ -2027,7 +2090,7 @@ class Elements_Post_Type_Controller {
 			return;
 		}
 		$path = KTP_URL . 'build/';
-		wp_enqueue_style( 'kadence-element-meta', $path . 'meta-controls.css', false, KTP_VERSION );
+		wp_enqueue_style( 'kadence-element-meta', KTP_URL . 'dist/build/meta-controls.css', false, KTP_VERSION );
 		wp_enqueue_script( 'kadence-element-meta' );
 		if ( get_post_meta( get_the_ID(), '_kad_element_preview_post', true ) ) {
 			$the_post_id = get_post_meta( get_the_ID(), '_kad_element_preview_post', true );
@@ -2067,6 +2130,9 @@ class Elements_Post_Type_Controller {
 				'previewPostType'    => apply_filters( 'kadence_elements_dynamic_content_preview_post_type', $the_post_type ),
 			)
 		);
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			wp_set_script_translations( 'kadence-element-meta', 'kadence-pro' );
+		}
 	}
 	/**
 	 * Setup the post type options for post blocks.
@@ -2209,9 +2275,6 @@ class Elements_Post_Type_Controller {
 			),
 		);
 		$kadence_public_post_types = kadence()->get_post_types();
-		if ( defined( 'TRIBE_EVENTS_FILE' ) ) {
-			$kadence_public_post_types = array_merge( $kadence_public_post_types, array( 'tribe_events' ) );
-		}
 		$ignore_types              = kadence()->get_public_post_types_to_ignore();
 		$display_singular = array();
 		foreach ( $kadence_public_post_types as $post_type ) {
@@ -3060,17 +3123,17 @@ class Elements_Post_Type_Controller {
 			$hooks = array_merge( $hooks, $learn_add );
 		}
 		if ( defined( 'TRIBE_EVENTS_FILE' ) ) {
-			$learn_add = array(
+			$events_add = array(
 				array(
 					'label' => esc_attr__( 'The Events Calendar', 'kadence-pro' ),
 					'options' => array(
 						array(
 							'value' => 'kadence_tribe_events_before_main_tag',
-							'label' => esc_attr__( 'Single Event: Before Content', 'kadence-pro' ),
+							'label' => esc_attr__( 'Events: Before Content', 'kadence-pro' ),
 						),
 						array(
 							'value' => 'kadence_tribe_events_after_main_tag',
-							'label' => esc_attr__( 'Single Event: After Content', 'kadence-pro' ),
+							'label' => esc_attr__( 'Events: After Content', 'kadence-pro' ),
 						),
 						array(
 							'value' => 'tribe_events_single_event_before_the_content',
@@ -3088,18 +3151,10 @@ class Elements_Post_Type_Controller {
 							'value' => 'tribe_events_single_event_after_the_meta',
 							'label' => esc_attr__( 'Single Event: After Meta (Classic Mode Only)', 'kadence-pro' ),
 						),
-						array(
-							'value' => 'kadence_tribe_archive_events_before_template',
-							'label' => esc_attr__( 'Archive Events: Before Content', 'kadence-pro' ),
-						),
-						array(
-							'value' => 'kadence_tribe_archive_events_after_template',
-							'label' => esc_attr__( 'Archive Events: After Content', 'kadence-pro' ),
-						),
 					),
 				),
 			);
-			$hooks = array_merge( $hooks, $learn_add );
+			$hooks = array_merge( $hooks, $events_add );
 		}
 		$custom_add = array(
 			array(
@@ -3467,6 +3522,7 @@ class Elements_Post_Type_Controller {
 			'display'         => esc_html__( 'Display On', 'kadence-pro' ),
 			'user_visibility' => esc_html__( 'Visible To', 'kadence-pro' ),
 			'shortcode'       => esc_html__( 'Shortcode', 'kadence-pro' ),
+			'status'          => esc_html__( 'Status', 'kadence-pro' ),
 		);
 
 		$new_columns = array();
@@ -3503,11 +3559,19 @@ class Elements_Post_Type_Controller {
 	 * @param int    $post_id     Post ID.
 	 */
 	private function render_post_type_column( string $column_name, int $post_id ) {
-		if ( 'hook' !== $column_name && 'display' !== $column_name && 'shortcode' !== $column_name && 'type' !== $column_name && 'user_visibility' !== $column_name ) {
+		if ( 'hook' !== $column_name && 'display' !== $column_name && 'status' !== $column_name && 'shortcode' !== $column_name && 'type' !== $column_name && 'user_visibility' !== $column_name ) {
 			return;
 		}
 		$post = get_post( $post_id );
 		$meta = $this->get_post_meta_array( $post );
+		if ( 'status' === $column_name ) {
+			if ( 'publish' === $post->post_status || 'draft' === $post->post_status ) {
+				$title = ( 'publish' === $post->post_status ? __( 'Published', 'kadence-pro' ) : __( 'Draft', 'kadence-pro' ) );
+				echo '<button class="kadence-status-toggle kadence-element-status kadence-status-' . esc_attr( $post->post_status ) . '" data-post-status="' . esc_attr( $post->post_status ) . '" data-post-id="' . esc_attr( $post_id ) . '"><span class="kadence-toggle"></span><span class="kadence-status-label">' . $title . '</span><span class="spinner"></span></button>';
+			} else {
+				echo '<div class="kadence-static-status-toggle">' . esc_html( $post->post_status ) . '</div>';
+			}
+		}
 		if ( 'hook' === $column_name ) {
 			if ( isset( $meta['hook'] ) && ! empty( $meta['hook'] ) && 'custom' !== $meta['hook'] ) {
 				$label = $this->get_item_label_in_array( $this->get_all_hook_options(), $meta['hook'] );

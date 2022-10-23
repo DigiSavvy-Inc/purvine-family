@@ -44,8 +44,15 @@ function kbp_dynamic_content_metabox( $meta_key, $meta_type, $type, $object_id, 
 			$size   = ( isset( $args['before'] ) ? $args['before'] : '' );
 			$output = kbp_dynamic_content_gallery_format( $output, $size );
 		} elseif ( 'url' === $type ) {
+			// Get the first in the list.
+			if ( $output && is_array( $output ) && ! isset( $output['url'] ) && ! isset( $output['ID'] ) ) {
+				$output = reset( $output );
+			}
 			if ( $output && is_array( $output ) && isset( $output['url'] ) ) {
 				$output = $output['url'];
+			} elseif ( $output && is_array( $output ) && isset( $output['ID'] ) ) {
+				$image  = wp_get_attachment_url( $output['ID'] );
+				$output = ( $image ? $image : '' );
 			} elseif ( $output === absint( $output ) ) {
 				$image  = wp_get_attachment_image_src( $output, 'full' );
 				$output = ( $image && $image[0] ? $image[0] : '' );

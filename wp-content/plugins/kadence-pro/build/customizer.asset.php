@@ -1,1 +1,1 @@
-<?php return array('dependencies' => array('moment', 'react', 'react-dom', 'wp-components', 'wp-element', 'wp-polyfill'), 'version' => '1b8d84626aef9722a02c2cdc035ad8f4');
+<?php return array('dependencies' => array('moment', 'react', 'react-dom', 'wp-components', 'wp-element', 'wp-i18n'), 'version' => '9f2145e882eeb1a51cec');

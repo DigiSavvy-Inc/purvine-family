@@ -147,7 +147,7 @@
 				}
 			}
 			window.addEventListener( 'resize', updateScrollSticky, false );
-			window.addEventListener( 'scroll', updateScrollSticky, false );
+			window.addEventListener( 'scroll', updateScrollSticky, { passive: true } );
 			window.addEventListener( 'load', updateScrollSticky, false );
 			updateScrollSticky();
 		},
@@ -180,6 +180,18 @@
 		 * Find the sticky items.
 		 */
 		stickFootItem: function( element ) {
+			var updateSticky = function( e ) {
+				element.classList.add('item-is-fixed');
+				element.classList.add('item-is-stuck');
+				element.classList.remove('item-at-start');
+			}
+			window.addEventListener( 'resize', updateSticky, false );
+			updateSticky();
+		},
+		/**
+		 * Find the sticky items.
+		 */
+		 stickFootItemBelow: function( element ) {
 			var updateSticky = function( e ) {
 				var parent = element.parentNode;
 				parent.style.height = element.offsetHeight + 'px';
@@ -265,7 +277,7 @@
 				return;
 			}
 			for ( let i = 0; i < stickyFootItems.length; i++ ) {
-				window.kadenceProSticky.stickFootItem( stickyFootItems[ i ] );
+				window.kadenceProSticky.stickFootItemBelow( stickyFootItems[ i ] );
 			}
 		},
 		/**

@@ -34,6 +34,7 @@
 				clearTimeout( timeout );
 				timeout = setTimeout( window.kadenceMegaMenu.runSubMenuContentSize, 500 );
 			}, false );
+			window.addEventListener( 'load', window.kadenceMegaMenu.runSubMenuContentSize );
 			window.kadenceMegaMenu.runSubMenuContentSize();
 
 		},

@@ -313,7 +313,7 @@ Theme_Customizer::add_settings(
 			'section'      => 'mobile_button2_design',
 			'priority'     => 10,
 			'default'      => kadence()->default( 'mobile_button2_radius' ),
-			'label'        => esc_html__( 'Border Radius', 'kadence' ),
+			'label'        => esc_html__( 'Border Radius', 'kadence-pro' ),
 			'live_method'     => array(
 				array(
 					'type'     => 'css',
@@ -353,7 +353,7 @@ Theme_Customizer::add_settings(
 		'mobile_button2_shadow' => array(
 			'control_type' => 'kadence_shadow_control',
 			'section'      => 'mobile_button2_design',
-			'label'        => esc_html__( 'Button Shadow', 'kadence' ),
+			'label'        => esc_html__( 'Button Shadow', 'kadence-pro' ),
 			'live_method'     => array(
 				array(
 					'type'     => 'css_boxshadow',
@@ -368,7 +368,7 @@ Theme_Customizer::add_settings(
 		'mobile_button2_shadow_hover' => array(
 			'control_type' => 'kadence_shadow_control',
 			'section'      => 'mobile_button2_design',
-			'label'        => esc_html__( 'Button Hover State Shadow', 'kadence' ),
+			'label'        => esc_html__( 'Button Hover State Shadow', 'kadence-pro' ),
 			'live_method'     => array(
 				array(
 					'type'     => 'css_boxshadow',

@@ -152,60 +152,63 @@ class Kadence_Blocks_Pro_Custom_Icons {
 	 * Render Meta Box
 	 */
 	public function render_metabox() {
-		// Variables.
 		global $post;
+
+		$icon_json = get_post_meta( $post->ID, '_kb_icon_json', true );
+		if ( empty( $icon_json ) ) {
+			$icon_json = '{}';
+		}
+
+		$type = get_post_meta( $post->ID, '_kb_icon_type', true );
+		if ( empty( $type ) ) {
+			$type = 'file';
+		}
+
 		$selection     = get_post_meta( $post->ID, '_kb_icon_selection', true );
 		$show_only     = get_post_meta( $post->ID, '_kb_icon_show_only', true );
 		$option_values = array( 'false', 'true' );
+
+		if ( ! empty( $selection ) && $type === 'file' ) {
+			$path = get_attached_file( $selection );
+			if ( ! empty( $path ) && file_exists( $path ) ) {
+				$icon_json = file_get_contents( $path );
+			}
+		}
+
+		wp_enqueue_style( 'wp-components' );
+		wp_register_script( 'kb-pro-icon-upload', KBP_URL . 'dist/build/icon-upload.js', array( 'lodash', 'wp-components', 'wp-dom-ready', 'wp-element', 'wp-i18n' ), '2.2', true );
+		wp_localize_script(
+			'kb-pro-icon-upload',
+			'kadence_blocks_params',
+			array(
+				'ajax_url'       => admin_url( 'admin-ajax.php' ),
+				'ajax_nonce'     => wp_create_nonce( 'kadence-blocks-ajax-verification' ),
+				'ajax_loader'    => KBP_URL . 'dist/assets/images/ajax-loader.gif',
+				'config'         => get_option( 'kt_blocks_config_blocks' ),
+				'configuration'  => get_option( 'kadence_blocks_config_blocks' ),
+				'settings'       => get_option( 'kadence_blocks_settings_blocks' ),
+				'rest_url'       => get_rest_url(),
+
+			)
+		);
+
+		wp_enqueue_script( 'kb-pro-icon-upload' );
+
 		?>
+		<script>
+			window.kadenceDynamicParams = {};
+			window.ktGbToolsData = {};
+
+			let kbIconJson = <?php echo $icon_json; ?>;
+
+		</script>
 
 			<fieldset class="kt_meta_box kb_icon_show_only" style="padding: 0 0 10px; border-bottom:1px solid #e9e9e9;">
-				<?php
-					if ( ! empty( $selection ) ) {
-						$icons = $this->build_preview_icon_array( $selection );
-						?>
-						<div>
-							<?php
-							echo '<h3 class="kb-file-title"><strong>' . esc_html__( 'Icon Set Name:', 'kadence-blocks-pro' ) . '</strong> ' . esc_html( $this->get_icon_name( $selection ) ) . '</h3>';
-							?>
-							<input type="hidden" name="_kb_icon_selection" id="_kb_icon_selection" value="<?php echo esc_attr( $selection ); ?>">
-							<div class="kb-meta-topbar-options" style="display: flex; justify-content: space-between;">
-								<?php
-								echo '<p class="kb-meta-desc"><strong>' . esc_html__( 'Icon Set Prefix:', 'kadence-blocks-pro' ) . '</strong> ' . esc_html( $this->get_icon_prefix( $selection ) ) . '</p>';
-								?>
-								<button type="button" class="button kb-meta-file-upload" id="kb_file_upload_btn" data-file-uploader-target="#_kb_icon_selection"><?php esc_html_e( 'Edit File', 'kadence-blocks-pro' ); ?></button>
-							</div>
-							<button type="button" class="button kb-meta-file-upload" style="display:none" id="kb_file_edit_btn" data-file-uploader-target="#_kb_icon_selection"><?php esc_html_e( 'Edit File', 'kadence-blocks-pro' ); ?></button>
-							<p class="kb-meta-save-notice" style="display:none; background: #FFFAF0;padding: 10px;"><?php echo esc_html__( 'Save/Publish to see uploaded icons.', 'kadence-blocks-pro' ); ?></p>
-							<ul class="kb-icon-previews" style="display: grid; grid-template-columns: repeat(auto-fill,minmax(105px,1fr)); grid-gap: 20px; padding: 15px 15px 0; overflow-y: auto;max-height: 575px; list-style: none;">
-								<?php
-								foreach ( $icons as $key => $item ) {
-									echo '<li class="icon-item" style="position: relative;border-radius: 3px;border: 1px solid #eee;overflow: hidden;text-align: center;display: flex;flex-direction: column;padding: 10px 10px 0;align-items: center;color:#333;justify-content: center;">';
-									echo '<svg style="display:inline-block;vertical-align:middle" viewBox="' . esc_attr( $item['vB'] ) . '" preserveAspectRatio="xMinYMin meet" height="24" width="24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">';
-									foreach ( $item['cD'] as $subkey => $path ) {
-										echo '<path d="' . esc_attr( $path['aBs']['d'] ) . '"></path>';
-									}
-									echo '</svg>';
-									echo '<p style="font-size: 10px;font-weight: normal; color:#888;">' . esc_html( $key ) . '</p>';
-									echo '</li>';
-								}
-								?>
-							</ul>
-						</div>
-						<?php
-					} else {
-						?>
-						<div>
-							<label for="_kb_icon_selection"><?php esc_html_e( 'Selection.json file', 'kadence-blocks-pro' ); ?></label><br>
-							<p class="kb-meta-desc"><?php echo esc_html__( 'Upload .json file from within the IcoMoon .zip file (Make sure each set has a unique prefix)', 'kadence-blocks-pro' ); ?></p>
-							<input type="hidden" name="_kb_icon_selection" id="_kb_icon_selection" value="">
-							<button type="button" class="button button-primary kb-meta-file-upload" id="kb_file_upload_btn" data-file-uploader-target="#_kb_icon_selection"><?php esc_html_e( 'Upload File', 'kadence-blocks-pro' ); ?></button>
-							<button type="button" class="button kb-meta-file-upload" style="display:none" id="kb_file_edit_btn" data-file-uploader-target="#_kb_icon_selection"><?php esc_html_e( 'Edit File', 'kadence-blocks-pro' ); ?></button>
-							<p class="kb-meta-save-notice" style="display:none;background: #FFFAF0;padding: 10px;"><?php echo esc_html__( 'Save/Publish to see uploaded icons.', 'kadence-blocks-pro' ); ?></p>
-						</div>
-						<?php
-					}
-				?>
+
+				<div class="kadence_replace_json_file">
+					Loading...
+				</div>
+
 			</fieldset>
 			<div class="clearfixit" style="padding: 5px 0; clear:both;"></div>
 			<fieldset class="kt_meta_box kb_icon_show_only" style="padding: 10px 0 0;">
@@ -280,6 +283,14 @@ class Kadence_Blocks_Pro_Custom_Icons {
 		if ( isset( $_POST['_kb_icon_show_only'] ) ) {
 			update_post_meta( $post_id, '_kb_icon_show_only', sanitize_text_field( wp_unslash( $_POST['_kb_icon_show_only'] ) ) );
 		}
+
+		if ( isset( $_POST['_kb_icon_json'] ) ) {
+			update_post_meta( $post_id, '_kb_icon_json', $_POST['_kb_icon_json'] );
+
+			if( !empty( $_POST['_kb_icon_json'] )) {
+				update_post_meta( $post_id, '_kb_icon_type', 'json' );
+			}
+		}
 	}
 	/**
 	 * Add icons to blocks.
@@ -329,6 +340,11 @@ class Kadence_Blocks_Pro_Custom_Icons {
 					)
 				);
 			}
+		}
+
+		global $typenow;
+		if ( 'kb_icon' === $typenow && in_array($pagenow, array( 'post.php', 'post-new.php' ) ) ) {
+			wp_enqueue_script( 'kt-admin-icons-edit', KBP_URL . 'dist/settings/admin-activate.js', false, KBP_VERSION );
 		}
 	}
 	/**
@@ -394,12 +410,16 @@ class Kadence_Blocks_Pro_Custom_Icons {
 	 *
 	 * @param number $id the file id.
 	 */
-	public function get_icon_name( $id ) {
+	public function get_icon_name( $id, $type = 'file') {
 		$name = __( 'Custom Icon Set', 'kadence-blocks-pro' );
 		if ( is_null( self::$icon_contents ) ) {
 			$path = get_attached_file( $id );
 			if ( ! empty( $path ) && file_exists( $path ) ) {
-				self::$icon_contents = json_decode( file_get_contents( $path ) );
+				if( $type === 'json') {
+					self::$icon_contents = json_decode( $id );
+				} else {
+					self::$icon_contents = json_decode( file_get_contents( $path ) );
+				}
 			}
 		}
 		if ( ! is_null( self::$icon_contents ) ) {
@@ -415,12 +435,16 @@ class Kadence_Blocks_Pro_Custom_Icons {
 	 *
 	 * @param number $id the file id.
 	 */
-	public function get_icon_prefix( $id ) {
+	public function get_icon_prefix( $id, $type = 'file' ) {
 		$prefix = __( 'Not Found', 'kadence-blocks-pro' );
 		if ( is_null( self::$icon_contents ) ) {
 			$path = get_attached_file( $id );
 			if ( ! empty( $path ) && file_exists( $path ) ) {
-				self::$icon_contents = json_decode( file_get_contents( $path ) );
+				if( $type === 'json') {
+					self::$icon_contents = json_decode( $id );
+				} else {
+					self::$icon_contents = json_decode( file_get_contents( $path ) );
+				}
 			}
 		}
 		if ( ! is_null( self::$icon_contents ) ) {
@@ -436,12 +460,16 @@ class Kadence_Blocks_Pro_Custom_Icons {
 	 *
 	 * @param number $id the file id.
 	 */
-	public function build_preview_icon_array( $id ) {
+	public function build_preview_icon_array( $id, $type = 'file' ) {
 		$icons = array();
 		if ( is_null( self::$icon_contents ) ) {
-			$path = get_attached_file( $id );
-			if ( ! empty( $path ) && file_exists( $path ) ) {
-				self::$icon_contents = json_decode( file_get_contents( $path ) );
+			if( $type === 'json') {
+				self::$icon_contents = json_decode( $id );
+			} else {
+				$path = get_attached_file( $id );
+				if ( ! empty( $path ) && file_exists( $path ) ) {
+					self::$icon_contents = json_decode( file_get_contents( $path ) );
+				}
 			}
 		}
 		if ( ! is_null( self::$icon_contents ) ) {
@@ -489,17 +517,34 @@ class Kadence_Blocks_Pro_Custom_Icons {
 		if ( $icons ) {
 			foreach ( $icons as $icon ) {
 				$title     = $icon->post_title;
+				$type      = get_post_meta( $icon->ID, '_kb_icon_type', true );
 				$show_only = get_post_meta( $icon->ID, '_kb_icon_show_only', true );
-				$selection = get_post_meta( $icon->ID, '_kb_icon_selection', true );
+
+				if ( $type === 'json' ) {
+					$selection = get_post_meta( $icon->ID, '_kb_icon_json', true );
+				} else {
+					$type = 'file';
+					$selection = get_post_meta( $icon->ID, '_kb_icon_selection', true );
+				}
+
 				if ( ! empty( $title ) && ! empty( $selection ) ) {
 					$path = get_attached_file( $selection );
-					if ( ! empty( $path ) && file_exists( $path ) ) {
+
+					if ( ( ! empty( $path ) && file_exists( $path ) ) || $type === 'json' ) {
 						if ( 'true' === $show_only ) {
 							self::$icon_array = null;
 							self::$icon_names = null;
 							self::$only_custom = true;
 						}
-						$import = json_decode( file_get_contents( $path ) );
+
+						if( $type === 'file') {
+							$import = json_decode( file_get_contents( $path ) );
+						} else if( isset( $selection) ) {
+							$import = json_decode( $selection );
+						} else {
+							continue;
+						}
+
 						if ( isset( $import->IcoMoonType ) && isset( $import->preferences ) && isset( $import->preferences->imagePref ) && isset( $import->preferences->imagePref->prefix ) ) {
 							$prefix = $import->preferences->imagePref->prefix;
 							$icon_name_array['icon_cats'][ $title ] = array();

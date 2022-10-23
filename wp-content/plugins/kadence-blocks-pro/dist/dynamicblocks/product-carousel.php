@@ -297,6 +297,7 @@ function kadence_blocks_pro_render_product_carousel_query( $attributes ) {
 			$atts['tag'] = implode( ',', $tags );
 		}
 	}
+	$atts = apply_filters( 'kadence_blocks_pro_product_carousel_atts', $atts, $attributes );
 	if ( class_exists( 'WC_Shortcode_Products' ) ) {
 		$shortcode = new WC_Shortcode_Products( $atts, $type );
 

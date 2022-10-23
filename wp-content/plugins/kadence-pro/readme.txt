@@ -2,8 +2,8 @@
 Contributors: britner
 Tags: theme, blocks, hooks,
 Requires at least: 5.2
-Tested up to: 5.9
-Stable tag: 1.0.5
+Tested up to: 6.0
+Stable tag: 1.0.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,6 +35,21 @@ Premium Addons for the Kadence Theme.
 Install the plugin into the `/wp-content/plugins/` folder, and activate it. This plugin is an extension of Kadence Theme, you will be asked to install it if you do not have it installed already.
 
 == Changelog ==
+
+== 1.0.7 | 23rd September 2022 ==
+* Fix: Possible issue of css styles in blocks breaking when using quick enable/disable.
+
+== 1.0.6 | 22nd September 2022 ==
+* Add: Element Duplicate button.
+* Add: Element quick disable.
+* Update: Event Calendar Hooks.
+* Fix: Issues with js translations not working.
+* Fix: Issue with custom padding of extra navigation areas.
+* Fix: Issue with showing elements on taxonomies.
+* Fix: Issue with possible notice in admin with shortpixel.
+* Fix: Issue with color switch losing "current".
+* Fix: Issue with custom archive settings missing 4 column option.
+* Fix: Issue with custom width mega menu missing on hover animations.
 
 == 1.0.5 | 4th March 2022 ==
 * Add: Menu Item description options.

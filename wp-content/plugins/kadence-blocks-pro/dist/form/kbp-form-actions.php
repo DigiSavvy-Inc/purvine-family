@@ -44,7 +44,6 @@ class KBP_Form_Actions {
 	 */
 	public function process_actions( $form_args, $fields, $form_id, $post_id ) {
 		if ( isset( $form_args ) && is_array( $form_args ) && isset( $form_args['actions'] ) ) {
-
 			foreach ( $form_args['actions'] as $data ) {
 				switch ( $data ) {
 					case 'autoEmail':
@@ -184,17 +183,17 @@ class KBP_Form_Actions {
 							if ( $templateId ) {
 								$redirectionUrl = ( isset( $sendinblue_args['redirectionUrl'] ) && ! empty( $sendinblue_args['redirectionUrl'] ) ? $sendinblue_args['redirectionUrl'] : false );
 								if ( $redirectionUrl ) {
-									$doubleOptin = ( isset( $sendinblue_args['doubleOptin'] ) ? $sendinblue_args['doubleOptin'] : false );
+									$double_optin = ( isset( $sendinblue_args['doubleOptin'] ) ? $sendinblue_args['doubleOptin'] : false );
 								} else {
-									$doubleOptin = false;
+									$double_optin = false;
 								}
 							} else {
-								$doubleOptin = false;
+								$double_optin = false;
 							}
 							$body = array(
 								'attributes' => array(),
 							);
-							if ( $doubleOptin ) {
+							if ( $double_optin ) {
 								$body['templateId'] = $templateId;
 								$body['redirectionUrl'] = $redirectionUrl;
 							} else {
@@ -242,14 +241,14 @@ class KBP_Form_Actions {
 									'listIds' => array(),
 								);
 							}
-							if ( $doubleOptin ) {
+							if ( $double_optin ) {
 								$body['includeListIds'] = $lists['listIds'];
 							} else {
 								$body['listIds'] = $lists['listIds'];
 							}
 							//error_log( print_r( $body, true ) );
 							if ( isset( $body[ 'email' ] ) ) {
-								$api_url = ( $doubleOptin ? 'https://api.sendinblue.com/v3/contacts/doubleOptinConfirmation' : 'https://api.sendinblue.com/v3/contacts' );
+								$api_url = ( $double_optin ? 'https://api.sendinblue.com/v3/contacts/doubleOptinConfirmation' : 'https://api.sendinblue.com/v3/contacts' );
 								$response = wp_remote_post(
 									$api_url,
 									array(
@@ -326,13 +325,13 @@ class KBP_Form_Actions {
 						$groups      = ( isset( $mailchimp_args['groups'] ) && is_array( $mailchimp_args['groups'] ) ? $mailchimp_args['groups'] : array() );
 						$tags        = ( isset( $mailchimp_args['tags'] ) && is_array( $mailchimp_args['tags'] ) ? $mailchimp_args['tags'] : array() );
 						$map         = ( isset( $mailchimp_args['map'] ) && is_array( $mailchimp_args['map'] ) ? $mailchimp_args['map'] : array() );
-						$doubleOptin = ( isset( $mailchimp_args['doubleOptin'] ) ? $mailchimp_args['doubleOptin'] : false );
+						$double_optin = ( isset( $mailchimp_args['doubleOptin'] ) ? $mailchimp_args['doubleOptin'] : false );
 						$body   = array(
 							'email_address' => '',
 							'status_if_new' => 'subscribed',
 							'status'        => 'subscribed',
 						);
-						if ( $doubleOptin ) {
+						if ( $double_optin ) {
 							$body['status_if_new'] = 'pending';
 							$body['double_optin']  = true;
 						}
@@ -472,6 +471,87 @@ class KBP_Form_Actions {
 							}
 						}
 					break;
+					case 'activecampaign':
+						$api_key = get_option( 'kadence_blocks_activecampaign_api_key' );
+						$api_url = get_option( 'kadence_blocks_activecampaign_api_base' );
+						if ( empty( $api_key ) || empty( $api_url ) ) {
+							return;
+						}
+						$activecampaign_default = array(
+							'list'        => array(),
+							'tags'      => array(),
+							'map'         => array(),
+							'doubleOptin' => false,
+						);
+						$activecampaign_args = ( isset( $form_args['activecampaign'] ) && is_array( $form_args['activecampaign'] ) && isset( $form_args['activecampaign'][0] ) && is_array( $form_args['activecampaign'][0] ) ? $form_args['activecampaign'][0] : $activecampaign_default );
+						$list         = ( isset( $activecampaign_args['list'] ) ? $activecampaign_args['list'] : '' );
+						$tags         = ( isset( $activecampaign_args['tags'] ) && is_array( $activecampaign_args['tags'] ) ? $activecampaign_args['tags'] : array() );
+						$map          = ( isset( $activecampaign_args['map'] ) && is_array( $activecampaign_args['map'] ) ? $activecampaign_args['map'] : array() );
+						$double_optin = ( isset( $activecampaign_args['doubleOptin'] ) ? $activecampaign_args['doubleOptin'] : false );
+						if ( empty( $list ) || ! is_array( $list ) ) {
+							return;
+						}
+						$email = false;
+						$tags_array = array();
+						if ( ! empty( $tags ) ) {
+							foreach ( $tags as $tag_index => $tag_item ) {
+								$tags_array[] = $tag_item['value'];
+							}
+						}
+						$contact = array();
+						$custom_fields = array();
+						if ( ! empty( $map ) ) {
+							foreach ( $fields as $key => $data ) {
+								if ( isset( $map[ $key ] ) && ! empty( $map[ $key ] ) ) {
+									if ( 'email' === $map[ $key ] && ! $email ) {
+										$email = $data['value'];
+										$contact['email'] = $data['value'];
+									} elseif ( 'firstName' === $map[ $key ] ) {
+										$contact['firstName'] = $data['value'];
+									} elseif ( 'lastName' === $map[ $key ] ) {
+										$contact['lastName'] = $data['value'];
+									} elseif ( 'phone' === $map[ $key ] ) {
+										$contact['phone'] = $data['value'];
+									} else {
+										$custom_fields[] = array( 'field' => $map[ $key ], 'value' => $data['value'] );
+									}
+								}
+							}
+						} else {
+							foreach ( $fields as $key => $data ) {
+								if ( 'email' === $data['type'] ) {
+									$email = $data['value'];
+									$contact['email'] = $data['value'];
+									break;
+								}
+							}
+						}
+						if ( ! empty( $custom_fields ) ) {
+							$contact['fieldValues'] = $custom_fields;
+						}
+						$list_array = array();
+						if ( ! empty( $list ) ) {
+							foreach ( $list as $list_index => $list_item ) {
+								$list_array[] = $list_item['value'];
+							}
+						}
+						if ( empty( $list_array ) ) {
+							return;
+						}
+						if ( ! empty( $contact['email'] ) ) {
+							$active_campaign = new KBP_Active_Campaign( $api_url, $api_key );
+							$found_contact = $active_campaign->update_or_create_contact( $contact );
+							if ( empty( $found_contact ) ) {
+								error_log( __( 'No Response from Active Campaign', 'kadence-blocks-pro' ) );
+								return;
+							}
+							$contact_list = $active_campaign->add_lists_to_contact( $found_contact, $list_array, $double_optin );
+							if ( ! empty( $tags_array ) ) {
+								$contact_tag = $active_campaign->add_tags_to_contact( $found_contact, $tags_array );
+							}
+							return;
+						}
+						break;
 					case 'webhook':
 						$webhook_defaults = array(
 							'url' => '',

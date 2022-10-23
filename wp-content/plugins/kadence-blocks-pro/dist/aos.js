@@ -6,13 +6,17 @@
                 AOS.refresh();
             },
             initAOS: function() {
-                  AOS.init( {
-                        offset: parseInt( kadence_aos_params.offset ),
-                        duration: parseInt( kadence_aos_params.duration ),
-                        easing: kadence_aos_params.easing,
-                        delay: parseInt( kadence_aos_params.delay ),
-                        once: kadence_aos_params.once,
-                  } );
+				AOS.init( {
+					offset: parseInt( kadence_aos_params.offset ),
+					duration: parseInt( kadence_aos_params.duration ),
+					easing: kadence_aos_params.easing,
+					delay: parseInt( kadence_aos_params.delay ),
+					once: kadence_aos_params.once,
+				} );
+				window.addEventListener( 'load', (event) => {
+					window.kadenceBlocksAOS.initRefresh();
+					setTimeout( window.kadenceBlocksAOS.initRefresh(), 500);
+				});
             },
 			initRefreshMasonryListeners: function () {
 				var masonryitems = document.querySelectorAll( '.kb-masonry-init' );

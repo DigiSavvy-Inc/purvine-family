@@ -69,6 +69,28 @@ class Kadence_Blocks_Pro_Backend {
 				'default'           => '',
 			)
 		);
+		register_setting(
+			'kadence_blocks_activecampaign_api_key',
+			'kadence_blocks_activecampaign_api_key',
+			array(
+				'type'              => 'string',
+				'description'       => __( 'ActiveCampaign API Key', 'kadence-blocks-pro' ),
+				'sanitize_callback' => 'sanitize_text_field',
+				'show_in_rest'      => true,
+				'default'           => '',
+			)
+		);
+		register_setting(
+			'kadence_blocks_activecampaign_api_base',
+			'kadence_blocks_activecampaign_api_base',
+			array(
+				'type'              => 'string',
+				'description'       => __( 'ActiveCampaign API Base', 'kadence-blocks-pro' ),
+				'sanitize_callback' => 'sanitize_text_field',
+				'show_in_rest'      => true,
+				'default'           => '',
+			)
+		);
 	}
 	/**
 	 * Change Settings Page url.

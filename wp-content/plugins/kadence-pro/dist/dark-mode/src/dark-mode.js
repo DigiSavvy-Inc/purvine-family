@@ -10,6 +10,7 @@
 		// Initiate scroll when the DOM loads.
 		init: function() {
 			var paletteCookie = window.kadenceProDarkMode.getCookie( 'paletteCookie' );
+			// console.log( paletteCookie );
 			// Check if we have a cookie set.
 			if ( paletteCookie && ( 'dark' === paletteCookie || 'light' === paletteCookie ) ) {
 				if ( 'dark' === paletteCookie && document.body.classList.contains( 'color-switch-light' ) ) {
